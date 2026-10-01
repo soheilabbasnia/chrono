@@ -63,10 +63,9 @@
             font-family: 'Vazirmatn', sans-serif !important;
         }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #161b22; }
-        ::-webkit-scrollbar-thumb { background: #2a323d; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #00d285; }
+        /* Hide Scrollbar but keep functionality */
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
 
         .modal-overlay {
             background: rgba(15, 19, 24, 0.7);
@@ -75,7 +74,7 @@
         }
 
         .session-row {
-            height: 3.5rem; /* 56px uniform height */
+            min-height: 3.5rem; 
             display: flex;
             align-items: center;
         }
@@ -94,7 +93,7 @@
 <body class="text-white h-screen flex flex-col">
 
     <!-- Main Container -->
-    <div class="w-full max-w-[1144px] mx-auto px-2 sm:px-4 py-4 flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div class="w-full max-w-[1320px] mx-auto px-2 sm:px-4 py-4 flex-1 flex flex-col min-h-0 overflow-hidden">
         
         <!-- Top Bar -->
         <header class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4 flex-shrink-0">
@@ -132,12 +131,24 @@
         <!-- Tracker View -->
         <main id="tracker-view" class="flex-1 flex flex-col min-h-0">
             <div class="bg-panel border border-border-main rounded-[20px] shadow-2xl flex flex-col flex-1 min-h-0 overflow-hidden">
+                
+                <!-- Search & Filter Bar -->
+                <div class="p-4 flex flex-col sm:flex-row gap-2 sm:gap-4 border-b border-border-main bg-bg-soft/30 flex-shrink-0">
+                    <input type="text" id="search-input" class="flex-1 bg-bg-main border border-border-main rounded-xl p-2.5 text-white text-sm focus:outline-none focus:border-emerald-glow" placeholder="جستجوی نام تسک (حداقل ۳ حرف)...">
+                    <button id="date-filter-btn" class="px-4 py-2.5 rounded-xl bg-bg-main border border-border-main text-gray-300 hover:border-emerald-glow hover:text-emerald-glow transition-all text-sm font-medium whitespace-nowrap">
+                        فیلتر بازه تاریخی
+                    </button>
+                    <button id="clear-filter-btn" class="hidden px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all text-sm font-medium whitespace-nowrap">
+                        حذف فیلترها
+                    </button>
+                </div>
+
                 <div class="px-2 sm:px-6 py-3 border-b border-border-main bg-bg-soft/50 flex-shrink-0">
                     <div class="grid grid-cols-12 gap-2 text-xs sm:text-sm text-gray-500 font-medium">
-                        <div class="col-span-2">تاریخ</div>
-                        <div class="col-span-5">تسک‌ها / توضیحات</div>
-                        <div class="col-span-2">شروع</div>
-                        <div class="col-span-2">پایان (مدت)</div>
+                        <div class="col-span-2 sm:col-span-1">تاریخ</div>
+                        <div class="col-span-7 sm:col-span-8">تسک‌ها / توضیحات</div>
+                        <div class="col-span-1">شروع</div>
+                        <div class="col-span-1">پایان (مدت)</div>
                         <div class="col-span-1 text-left pl-2">عملیات</div>
                     </div>
                 </div>
@@ -147,21 +158,67 @@
 
         <!-- Reports View -->
         <main id="reports-view" class="hidden flex-1 flex-col min-h-0 overflow-y-auto pr-1 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-shrink-0">
-                <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-6 shadow-xl">
-                    <p class="text-gray-400 text-xs sm:text-sm mb-2">کل ساعت‌ها</p>
-                    <h3 id="total-hours" class="text-2xl sm:text-3xl font-black text-emerald-glow">۰۰:۰۰</h3>
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
+                <!-- Card 1: Total -->
+                <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <p class="text-gray-400 text-sm font-medium">کل ساعت‌ها</p>
+                        <span class="w-8 h-8 rounded-full bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 id="total-hours" class="text-2xl sm:text-3xl font-black text-emerald-glow mb-1">۰۰:۰۰</h3>
+                        <p id="total-tasks" class="text-gray-500 text-xs">۰ تسک ثبت شده</p>
+                    </div>
                 </div>
-                <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-6 shadow-xl">
-                    <p class="text-gray-400 text-xs sm:text-sm mb-2">میانگین روزانه</p>
-                    <h3 id="daily-avg" class="text-2xl sm:text-3xl font-black text-white">۰۰:۰۰</h3>
+                <!-- Card 2: Week -->
+                <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <p class="text-gray-400 text-sm font-medium">این هفته</p>
+                        <span class="w-8 h-8 rounded-full bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 id="week-hours" class="text-2xl sm:text-3xl font-black text-white mb-1">۰۰:۰۰</h3>
+                        <p id="week-tasks" class="text-gray-500 text-xs">۰ تسک ثبت شده</p>
+                    </div>
                 </div>
-                <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-6 shadow-xl">
-                    <p class="text-gray-400 text-xs sm:text-sm mb-2">تعداد تسک‌ها</p>
-                    <h3 id="task-count" class="text-2xl sm:text-3xl font-black text-white">۰ تسک</h3>
+                <!-- Card 3: Today -->
+                <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <p class="text-gray-400 text-sm font-medium">امروز</p>
+                        <span class="w-8 h-8 rounded-full bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 id="today-hours" class="text-2xl sm:text-3xl font-black text-white mb-1">۰۰:۰۰</h3>
+                        <p id="today-tasks" class="text-gray-500 text-xs">۰ تسک ثبت شده</p>
+                    </div>
+                </div>
+                <!-- Card 4: Average -->
+                <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
+                    <div class="flex justify-between items-center relative z-10">
+                        <p class="text-gray-400 text-sm font-medium">میانگین روزانه</p>
+                        <span class="w-8 h-8 rounded-full bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        </span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 id="avg-hours" class="text-2xl sm:text-3xl font-black text-white mb-1">۰۰:۰۰</h3>
+                        <p id="avg-tasks" class="text-gray-500 text-xs">۰ تسک در روز</p>
+                    </div>
                 </div>
             </div>
 
+            <!-- Chart & Export -->
             <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-8 shadow-xl flex-shrink-0">
                 <div class="flex flex-col md:flex-row justify-between items-start mb-8 gap-4 no-print">
                     <h3 class="text-lg sm:text-xl font-bold">توزیع زمان</h3>
@@ -186,6 +243,12 @@
                     <div id="chart-legend" class="flex-1 space-y-3 w-full"></div>
                 </div>
             </div>
+
+            <!-- Daily Breakdown (Full Task Text) -->
+            <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-8 shadow-xl flex-shrink-0">
+                <h3 class="text-lg sm:text-xl font-bold mb-6">گزارش روزانه</h3>
+                <div id="daily-breakdown" class="space-y-4"></div>
+            </div>
         </main>
     </div>
 
@@ -194,14 +257,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const STORAGE_KEY = 'chronos_db_v4';
-            let state = { activeSession: null, sessions: [] };
+            let state = { activeSession: null, sessions: [], filters: { text: '', from: null, to: null } };
 
             const loadState = () => {
                 const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) state = JSON.parse(saved);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.activeSession = parsed.activeSession || null;
+                    state.sessions = parsed.sessions || [];
+                }
             };
 
-            const saveState = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            const saveState = () => localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeSession: state.activeSession, sessions: state.sessions }));
 
             const toFa = (str) => str === null || str === undefined ? '' : str.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
             const toEn = (str) => !str ? '' : str.toString().replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
@@ -280,6 +347,8 @@
             const toggleBtn = document.getElementById('toggle-session-btn');
             const toggleBtnText = document.getElementById('toggle-btn-text');
             const toggleBtnIcon = document.getElementById('toggle-btn-icon');
+            const searchInput = document.getElementById('search-input');
+            const clearFilterBtn = document.getElementById('clear-filter-btn');
 
             const switchView = (view) => {
                 if (view === 'reports') {
@@ -300,38 +369,134 @@
             tabTracker.addEventListener('click', () => switchView('tracker'));
             tabReports.addEventListener('click', () => switchView('reports'));
 
+            // --- Filtering Logic ---
+            const getFilteredSessions = () => {
+                let sessions = [...state.sessions].reverse();
+                const { text, from, to } = state.filters;
+
+                if (text && text.length >= 3) {
+                    sessions = sessions.filter(s => s.task?.includes(text));
+                }
+
+                if (from && to) {
+                    sessions = sessions.filter(s => s.startTime >= from && s.startTime <= to);
+                }
+
+                return sessions;
+            };
+
+            searchInput.addEventListener('input', (e) => {
+                state.filters.text = e.target.value.trim();
+                renderTracker();
+            });
+
+            clearFilterBtn.addEventListener('click', () => {
+                state.filters = { text: '', from: null, to: null };
+                searchInput.value = '';
+                renderTracker();
+            });
+
+            document.getElementById('date-filter-btn').addEventListener('click', () => {
+                const html = `
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg sm:text-xl font-bold text-white">فیلتر بازه تاریخی</h2>
+                        <button class="modal-close-x text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-2">از تاریخ (YYYY/MM/DD)</label>
+                            <input type="text" id="date-from-input" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-white focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۰۱">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-2">تا تاریخ (YYYY/MM/DD)</label>
+                            <input type="text" id="date-to-input" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-white focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۳۱">
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button id="modal-apply-date" class="flex-1 py-3 rounded-xl bg-emerald-glow text-bg-main font-bold transition-all hover:opacity-90 active:scale-95 text-sm">اعمال فیلتر</button>
+                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-gray-300 font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
+                    </div>
+                `;
+                openModal(html, (modal) => {
+                    modal.querySelector('.modal-close-x').onclick = closeModal;
+                    modal.querySelector('.modal-cancel').onclick = closeModal;
+                    modal.querySelector('#modal-apply-date').onclick = () => {
+                        const fromVal = modal.querySelector('#date-from-input').value.trim();
+                        const toVal = modal.querySelector('#date-to-input').value.trim();
+                        
+                        try {
+                            if (fromVal) {
+                                const [jy, jm, jd] = toEn(fromVal).split('/').map(Number);
+                                state.filters.from = jalaaliToGregorian(jy, jm, jd).getTime();
+                            } else {
+                                state.filters.from = null;
+                            }
+                            
+                            if (toVal) {
+                                const [jy, jm, jd] = toEn(toVal).split('/').map(Number);
+                                let gDate = jalaaliToGregorian(jy, jm, jd);
+                                gDate.setHours(23, 59, 59, 999);
+                                state.filters.to = gDate.getTime();
+                            } else {
+                                state.filters.to = null;
+                            }
+                            
+                            closeModal();
+                            renderTracker();
+                        } catch (err) {
+                            alert("فرمت تاریخ نامعتبر است. مثال: ۱۴۰۳/۰۱/۰۱");
+                        }
+                    };
+                });
+            });
+
+            // --- Tracker Logic ---
             const renderTracker = () => {
                 sessionList.innerHTML = '';
-                if (state.activeSession) sessionList.appendChild(createRowElement(state.activeSession, true));
-
-                if (state.sessions.length === 0 && !state.activeSession) {
-                    sessionList.innerHTML = `<div class="text-center text-gray-500 py-20 text-sm">هنوز نوبت کاری ثبت نشده است.</div>`;
+                
+                if (state.filters.text || state.filters.from || state.filters.to) {
+                    clearFilterBtn.classList.remove('hidden');
+                    clearFilterBtn.classList.add('block');
                 } else {
-                    [...state.sessions].reverse().forEach(s => sessionList.appendChild(createRowElement(s, false)));
+                    clearFilterBtn.classList.add('hidden');
+                }
+
+                if (state.activeSession && !state.filters.text && !state.filters.from) {
+                    sessionList.appendChild(createRowElement(state.activeSession, true));
+                }
+
+                const filteredSessions = getFilteredSessions();
+
+                if (filteredSessions.length === 0 && !state.activeSession) {
+                    sessionList.innerHTML = `<div class="text-center text-gray-500 py-20 text-sm">موردی یافت نشد.</div>`;
+                } else {
+                    filteredSessions.forEach(s => sessionList.appendChild(createRowElement(s, false)));
                 }
                 updateToggleButton();
             };
 
             const createRowElement = (session, isActive) => {
                 const row = document.createElement('div');
-                row.className = `session-row grid grid-cols-12 gap-2 px-2 sm:px-6 border-b border-border-main/50 transition-all text-xs sm:text-sm ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
+                row.className = `session-row grid grid-cols-12 gap-2 px-2 sm:px-6 py-3 border-b border-border-main/50 transition-all text-xs sm:text-sm ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
                 
-                const dateCol = `<div class="col-span-2 text-gray-300 font-medium truncate">${formatSolarDate(session.startTime)}</div>`;
-                const taskCol = `<div class="col-span-5 text-white truncate">${session.task || 'بدون توضیحات'}</div>`;
-                const startCol = `<div class="col-span-2 text-gray-400">${formatTime(session.startTime)}</div>`;
+                const dateCol = `<div class="col-span-2 sm:col-span-1 text-gray-300 font-medium pt-1">${formatSolarDate(session.startTime)}</div>`;
+                const taskCol = `<div class="col-span-7 sm:col-span-8 text-white whitespace-pre-wrap break-words leading-relaxed pt-1">${session.task || 'بدون توضیحات'}</div>`;
+                const startCol = `<div class="col-span-1 text-gray-400 pt-1">${formatTime(session.startTime)}</div>`;
                 
                 let endCol;
                 if (isActive) {
-                    endCol = `<div class="col-span-2"><span class="px-2 py-1 rounded-full bg-emerald-glow/15 text-emerald-glow text-[10px] sm:text-xs font-bold animate-pulse">در حال اجرا</span></div>`;
+                    endCol = `<div class="col-span-1 pt-1"><span class="px-2 py-1 rounded-full bg-emerald-glow/15 text-emerald-glow text-[10px] sm:text-xs font-bold animate-pulse">در حال اجرا</span></div>`;
                 } else {
                     const dur = formatDuration(session.endTime - session.startTime);
-                    endCol = `<div class="col-span-2 text-gray-400 flex flex-col"><span>${formatTime(session.endTime)}</span><span class="text-[9px] sm:text-[10px] text-gray-500">(${toFa(dur)})</span></div>`;
+                    endCol = `<div class="col-span-1 text-gray-400 flex flex-col pt-1"><span>${formatTime(session.endTime)}</span><span class="text-[9px] sm:text-[10px] text-gray-500">(${toFa(dur)})</span></div>`;
                 }
 
-                let actionCol = `<div class="col-span-1 text-left pl-1"></div>`;
+                let actionCol = `<div class="col-span-1 text-left pl-1 pt-1"></div>`;
                 if (!isActive) {
                     actionCol = `
-                        <div class="col-span-1 text-left pl-1 relative">
+                        <div class="col-span-1 text-left pl-1 relative pt-1">
                             <button class="action-menu-btn p-1 rounded-lg hover:bg-border-main text-gray-400 hover:text-white" data-id="${session.id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
                             </button>
@@ -531,32 +696,77 @@
                 });
             };
 
+            // --- Reports Logic ---
+            const isToday = (ts) => new Date(ts).toDateString() === new Date().toDateString();
+            
+            const getStartOfWeek = (ts) => {
+                const d = new Date(ts);
+                const day = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+                const diff = (day === 6) ? 0 : day + 1; // If Saturday(6), diff is 0. If Sunday(0), diff is 1.
+                d.setDate(d.getDate() - diff);
+                d.setHours(0, 0, 0, 0);
+                return d.getTime();
+            };
+
             const renderReports = () => {
                 const allSessions = [...state.sessions];
                 if (state.activeSession) allSessions.push(state.activeSession);
 
-                let totalMs = 0;
+                let totalMs = 0, weekMs = 0, todayMs = 0;
+                let totalTasks = allSessions.length;
+                let weekTasks = 0, todayTasks = 0;
                 const dailyData = {};
                 const taskData = {};
+                const dailyGroups = {};
+
+                const weekStart = getStartOfWeek(Date.now());
 
                 allSessions.forEach(s => {
                     const end = s.endTime || Date.now();
                     const durMs = end - s.startTime;
                     totalMs += durMs;
+                    
+                    if (s.startTime >= weekStart) {
+                        weekMs += durMs;
+                        weekTasks++;
+                    }
+                    
+                    if (isToday(s.startTime)) {
+                        todayMs += durMs;
+                        todayTasks++;
+                    }
+
                     const day = formatSolarDate(s.startTime);
                     dailyData[day] = (dailyData[day] || 0) + durMs;
-                    const taskName = s.task?.split('\n')[0]?.substring(0, 20) || 'بدون عنوان';
+                    
+                    if (!dailyGroups[day]) dailyGroups[day] = [];
+                    dailyGroups[day].push(s);
+
+                    // Fix: Removed substring limit to show full task name in chart
+                    const taskName = s.task?.split('\n')[0]?.trim() || 'بدون عنوان';
                     taskData[taskName] = (taskData[taskName] || 0) + durMs;
                 });
 
-                document.getElementById('total-hours').textContent = toFa(formatDuration(totalMs));
                 const uniqueDays = Object.keys(dailyData).length;
                 const avgMs = uniqueDays > 0 ? (totalMs / uniqueDays) : 0;
-                document.getElementById('daily-avg').textContent = toFa(formatDuration(avgMs));
-                document.getElementById('task-count').textContent = `${toFa(allSessions.length)} تسک`;
+                const avgTasks = uniqueDays > 0 ? Math.round(totalTasks / uniqueDays) : 0;
+
+                document.getElementById('total-hours').textContent = toFa(formatDuration(totalMs));
+                document.getElementById('total-tasks').textContent = `${toFa(totalTasks)} تسک ثبت شده`;
+                
+                document.getElementById('week-hours').textContent = toFa(formatDuration(weekMs));
+                document.getElementById('week-tasks').textContent = `${toFa(weekTasks)} تسک ثبت شده`;
+                
+                document.getElementById('today-hours').textContent = toFa(formatDuration(todayMs));
+                document.getElementById('today-tasks').textContent = `${toFa(todayTasks)} تسک ثبت شده`;
+                
+                document.getElementById('avg-hours').textContent = toFa(formatDuration(avgMs));
+                document.getElementById('avg-tasks').textContent = `${toFa(avgTasks)} تسک در روز`;
+                
                 document.getElementById('chart-center-text').textContent = toFa(formatDuration(totalMs));
 
                 renderDonutChart(taskData, totalMs);
+                renderDailyBreakdown(dailyGroups);
             };
 
             const renderDonutChart = (data, totalMs) => {
@@ -587,13 +797,14 @@
                     svg.appendChild(circle);
 
                     const legendItem = document.createElement('div');
-                    legendItem.className = 'flex items-center justify-between p-2 sm:p-3 rounded-lg bg-bg-soft/50 border border-border-main text-xs sm:text-sm';
+                    // Improved styling for long task names in legend
+                    legendItem.className = 'flex items-start justify-between gap-4 p-3 rounded-lg bg-bg-soft/50 border border-border-main text-xs sm:text-sm';
                     legendItem.innerHTML = `
-                        <div class="flex items-center gap-2 sm:gap-3">
-                            <span class="w-3 h-3 rounded-full" style="background-color: ${colors[colorIndex % colors.length]}"></span>
-                            <span class="text-white">${name}</span>
+                        <div class="flex items-start gap-3 flex-1 min-w-0">
+                            <span class="w-3 h-3 rounded-full mt-1 flex-shrink-0" style="background-color: ${colors[colorIndex % colors.length]}"></span>
+                            <span class="text-white break-words leading-relaxed">${name}</span>
                         </div>
-                        <span class="text-gray-400">${toFa(formatDuration(ms))} (${toFa((percentage * 100).toFixed(0))}٪)</span>
+                        <span class="text-gray-400 whitespace-nowrap mt-1 flex-shrink-0">${toFa(formatDuration(ms))} (${toFa((percentage * 100).toFixed(0))}٪)</span>
                     `;
                     legend.appendChild(legendItem);
                     cumulativePercentage += percentage;
@@ -601,6 +812,47 @@
                 });
             };
 
+            const renderDailyBreakdown = (dailyGroups) => {
+                const container = document.getElementById('daily-breakdown');
+                container.innerHTML = '';
+                
+                const sortedDays = Object.keys(dailyGroups).sort((a, b) => dailyGroups[b][0].startTime - dailyGroups[a][0].startTime);
+
+                if (sortedDays.length === 0) {
+                    container.innerHTML = '<div class="text-gray-500 text-sm">داده‌ای برای نمایش وجود ندارد.</div>';
+                    return;
+                }
+
+                sortedDays.forEach(day => {
+                    const sessions = dailyGroups[day];
+                    let dayMs = 0;
+                    let tasksHtml = '';
+                    
+                    sessions.forEach(s => {
+                        const end = s.endTime || Date.now();
+                        dayMs += (end - s.startTime);
+                        tasksHtml += `
+                            <div class="py-2 border-b border-border-main/30 text-xs sm:text-sm flex justify-between gap-4">
+                                <span class="text-gray-300 flex-1 whitespace-pre-wrap break-words">${s.task || 'بدون توضیحات'}</span>
+                                <span class="text-gray-500 whitespace-nowrap mt-1">${formatTime(s.startTime)} تا ${s.endTime ? formatTime(s.endTime) : 'الان'}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    const dayHtml = `
+                        <div class="bg-bg-soft/30 border border-border-main rounded-xl p-4">
+                            <div class="flex justify-between mb-2">
+                                <h4 class="text-sm sm:text-base font-bold text-emerald-glow">${day}</h4>
+                                <span class="text-xs text-gray-400">مدت زمان: ${toFa(formatDuration(dayMs))}</span>
+                            </div>
+                            <div>${tasksHtml}</div>
+                        </div>
+                    `;
+                    container.innerHTML += dayHtml;
+                });
+            };
+
+            // --- Export/Import Logic ---
             document.getElementById('export-csv').addEventListener('click', () => {
                 let csv = '\uFEFFتاریخ,تسک,ساعت شروع,ساعت پایان,مدت زمان\n';
                 state.sessions.forEach(s => {
@@ -621,7 +873,7 @@
             document.getElementById('export-pdf').addEventListener('click', () => window.print());
 
             document.getElementById('export-json').addEventListener('click', () => {
-                const dataStr = JSON.stringify(state, null, 2);
+                const dataStr = JSON.stringify({ activeSession: state.activeSession, sessions: state.sessions }, null, 2);
                 const blob = new Blob([dataStr], { type: "application/json" });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -641,7 +893,8 @@
                     try {
                         const importedState = JSON.parse(event.target.result);
                         if (importedState.sessions && importedState.activeSession !== undefined) {
-                            state = importedState;
+                            state.activeSession = importedState.activeSession;
+                            state.sessions = importedState.sessions;
                             saveState();
                             renderTracker();
                             renderReports();
