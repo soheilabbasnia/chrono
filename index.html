@@ -18,14 +18,15 @@
 
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        'bg-main': '#0f1318',
-                        'bg-soft': '#161b22',
-                        'panel': '#1c2128',
-                        'border-main': '#2a323d',
-                        'emerald-glow': '#00d285',
+                        'bg-main': 'rgb(var(--c-bg-main) / <alpha-value>)',
+                        'bg-soft': 'rgb(var(--c-bg-soft) / <alpha-value>)',
+                        'panel': 'rgb(var(--c-panel) / <alpha-value>)',
+                        'border-main': 'rgb(var(--c-border) / <alpha-value>)',
+                        'emerald-glow': 'rgb(var(--c-emerald) / <alpha-value>)',
                     },
                     fontFamily: {
                         'vazir': ['Vazirmatn', 'sans-serif'],
@@ -49,14 +50,38 @@
     </script>
 
     <style>
+        :root {
+            --c-bg-main: 15 19 24; /* #0f1318 */
+            --c-bg-soft: 22 27 34; /* #161b22 */
+            --c-panel: 28 33 40;   /* #1c2128 */
+            --c-border: 42 50 61;  /* #2a323d */
+            --c-emerald: 0 210 133;/* #00d285 */
+            --c-text-main: 255 255 255;
+            --c-text-soft: 156 163 175; /* gray-400 */
+            --c-text-muted: 107 114 128; /* gray-500 */
+        }
+
+        html.light {
+            --c-bg-main: 240 245 250; /* #f0f5fa */
+            --c-bg-soft: 224 232 240; /* #e0e8f0 */
+            --c-panel: 255 255 255;   /* #ffffff */
+            --c-border: 203 213 225;  /* #cbd5e1 */
+            --c-emerald: 16 185 129; /* #10b981 */
+            --c-text-main: 15 23 42; /* slate-900 */
+            --c-text-soft: 71 85 105; /* slate-600 */
+            --c-text-muted: 100 116 139; /* slate-500 */
+        }
+
         html, body {
             height: 100%;
             overflow: hidden;
         }
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: #0f1318;
+            background-color: rgb(var(--c-bg-main));
             background-image: radial-gradient(circle at 50% 0%, rgba(0, 210, 133, 0.05) 0%, transparent 50%);
+            color: rgb(var(--c-text-main));
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         input, textarea, button {
@@ -67,10 +92,18 @@
         ::-webkit-scrollbar { display: none; }
         * { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Utility classes bound to variables */
+        .text-main-color { color: rgb(var(--c-text-main)); }
+        .text-soft-color { color: rgb(var(--c-text-soft)); }
+        .text-muted-color { color: rgb(var(--c-text-muted)); }
+
         .modal-overlay {
             background: rgba(15, 19, 24, 0.7);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
+        }
+        html.light .modal-overlay {
+            background: rgba(240, 245, 250, 0.8);
         }
 
         .session-row {
@@ -88,9 +121,14 @@
             .print-text { color: black !important; }
             .print-emerald { color: #10b981 !important; }
         }
+
+        /* Theme Switcher Icon */
+        .theme-toggle-btn svg {
+            transition: transform 0.3s ease;
+        }
     </style>
 </head>
-<body class="text-white h-screen flex flex-col">
+<body class="h-screen flex flex-col">
 
     <!-- Main Container -->
     <div class="w-full max-w-[1320px] mx-auto px-2 sm:px-4 py-4 flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -98,17 +136,17 @@
         <!-- Top Bar -->
         <header class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4 flex-shrink-0">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-glow/10 border border-emerald-glow/30 flex items-center justify-center shadow-glow">
+                <div class="w-11 h-11 rounded-xl bg-emerald-glow/10 border border-emerald-glow/30 flex items-center justify-center shadow-glow">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-glow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h1 class="text-xl sm:text-2xl font-black tracking-tight">کرونوس <span class="text-emerald-glow text-xs sm:text-sm font-normal">(Chrono)</span></h1>
+                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-main-color">کرونوس <span class="text-emerald-glow text-xs sm:text-sm font-normal">(Chrono)</span></h1>
             </div>
             
-            <!-- Action Group: Toggle Button + Tabs -->
-            <div class="flex items-center gap-2 sm:gap-4">
-                <button id="toggle-session-btn" class="px-5 py-2.5 rounded-full bg-emerald-glow text-bg-main font-bold text-xs sm:text-sm shadow-glow transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 z-10">
+            <!-- Action Group: Toggle Button + Tabs + Theme Toggle -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="toggle-session-btn" class="h-10 px-5 rounded-xl bg-emerald-glow text-bg-main font-bold text-xs sm:text-sm shadow-glow transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 z-10">
                     <span id="toggle-btn-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
@@ -117,14 +155,24 @@
                     <span id="toggle-btn-text">شروع نوبت</span>
                 </button>
 
-                <nav class="flex gap-2 bg-panel border border-border-main rounded-full p-1.5">
-                    <button id="tab-tracker" class="tab-btn px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all duration-300 bg-emerald-glow/15 text-emerald-glow">
+                <nav class="h-11 flex items-center gap-1 bg-panel border border-border-main rounded-xl p-1">
+                    <button id="tab-tracker" class="tab-btn h-9 px-5 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300 bg-emerald-glow/15 text-emerald-glow">
                         ثبت زمان
                     </button>
-                    <button id="tab-reports" class="tab-btn px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all duration-300 text-gray-400 hover:text-white">
+                    <button id="tab-reports" class="tab-btn h-9 px-5 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300 text-soft-color hover:text-main-color">
                         گزارش‌ها
                     </button>
                 </nav>
+
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle-btn" class="theme-toggle-btn h-11 w-11 rounded-xl bg-panel border border-border-main text-soft-color hover:text-emerald-glow hover:border-emerald-glow transition-all duration-300 flex items-center justify-center">
+                    <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                    <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+                    </svg>
+                </button>
             </div>
         </header>
 
@@ -134,17 +182,17 @@
                 
                 <!-- Search & Filter Bar -->
                 <div class="p-4 flex flex-col sm:flex-row gap-2 sm:gap-4 border-b border-border-main bg-bg-soft/30 flex-shrink-0">
-                    <input type="text" id="search-input" class="flex-1 bg-bg-main border border-border-main rounded-xl p-2.5 text-white text-sm focus:outline-none focus:border-emerald-glow" placeholder="جستجوی نام تسک (حداقل ۳ حرف)...">
-                    <button id="date-filter-btn" class="px-4 py-2.5 rounded-xl bg-bg-main border border-border-main text-gray-300 hover:border-emerald-glow hover:text-emerald-glow transition-all text-sm font-medium whitespace-nowrap">
+                    <input type="text" id="search-input" class="flex-1 h-11 bg-bg-main border border-border-main rounded-xl px-3 text-main-color text-sm focus:outline-none focus:border-emerald-glow" placeholder="جستجوی نام تسک (حداقل ۳ حرف)...">
+                    <button id="date-filter-btn" class="h-11 px-4 rounded-xl bg-bg-main border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-sm font-medium whitespace-nowrap">
                         فیلتر بازه تاریخی
                     </button>
-                    <button id="clear-filter-btn" class="hidden px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all text-sm font-medium whitespace-nowrap">
+                    <button id="clear-filter-btn" class="hidden h-11 px-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all text-sm font-medium whitespace-nowrap">
                         حذف فیلترها
                     </button>
                 </div>
 
                 <div class="px-2 sm:px-6 py-3 border-b border-border-main bg-bg-soft/50 flex-shrink-0">
-                    <div class="grid grid-cols-12 gap-2 text-xs sm:text-sm text-gray-500 font-medium">
+                    <div class="grid grid-cols-12 gap-2 text-xs sm:text-sm text-muted-color font-medium">
                         <div class="col-span-2 sm:col-span-1">تاریخ</div>
                         <div class="col-span-7 sm:col-span-8">تسک‌ها / توضیحات</div>
                         <div class="col-span-1">شروع</div>
@@ -164,56 +212,56 @@
                 <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
                     <div class="flex justify-between items-center relative z-10">
-                        <p class="text-gray-400 text-sm font-medium">کل ساعت‌ها</p>
-                        <span class="w-8 h-8 rounded-full bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
+                        <p class="text-soft-color text-sm font-medium">کل ساعت‌ها</p>
+                        <span class="w-8 h-8 rounded-lg bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </span>
                     </div>
                     <div class="relative z-10">
                         <h3 id="total-hours" class="text-2xl sm:text-3xl font-black text-emerald-glow mb-1">۰۰:۰۰</h3>
-                        <p id="total-tasks" class="text-gray-500 text-xs">۰ تسک ثبت شده</p>
+                        <p id="total-tasks" class="text-muted-color text-xs">۰ تسک ثبت شده</p>
                     </div>
                 </div>
                 <!-- Card 2: Week -->
                 <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
                     <div class="flex justify-between items-center relative z-10">
-                        <p class="text-gray-400 text-sm font-medium">این هفته</p>
-                        <span class="w-8 h-8 rounded-full bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
+                        <p class="text-soft-color text-sm font-medium">این هفته</p>
+                        <span class="w-8 h-8 rounded-lg bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         </span>
                     </div>
                     <div class="relative z-10">
-                        <h3 id="week-hours" class="text-2xl sm:text-3xl font-black text-white mb-1">۰۰:۰۰</h3>
-                        <p id="week-tasks" class="text-gray-500 text-xs">۰ تسک ثبت شده</p>
+                        <h3 id="week-hours" class="text-2xl sm:text-3xl font-black text-main-color mb-1">۰۰:۰۰</h3>
+                        <p id="week-tasks" class="text-muted-color text-xs">۰ تسک ثبت شده</p>
                     </div>
                 </div>
                 <!-- Card 3: Today -->
                 <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
                     <div class="flex justify-between items-center relative z-10">
-                        <p class="text-gray-400 text-sm font-medium">امروز</p>
-                        <span class="w-8 h-8 rounded-full bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
+                        <p class="text-soft-color text-sm font-medium">امروز</p>
+                        <span class="w-8 h-8 rounded-lg bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                         </span>
                     </div>
                     <div class="relative z-10">
-                        <h3 id="today-hours" class="text-2xl sm:text-3xl font-black text-white mb-1">۰۰:۰۰</h3>
-                        <p id="today-tasks" class="text-gray-500 text-xs">۰ تسک ثبت شده</p>
+                        <h3 id="today-hours" class="text-2xl sm:text-3xl font-black text-main-color mb-1">۰۰:۰۰</h3>
+                        <p id="today-tasks" class="text-muted-color text-xs">۰ تسک ثبت شده</p>
                     </div>
                 </div>
                 <!-- Card 4: Average -->
                 <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
                     <div class="flex justify-between items-center relative z-10">
-                        <p class="text-gray-400 text-sm font-medium">میانگین روزانه</p>
-                        <span class="w-8 h-8 rounded-full bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
+                        <p class="text-soft-color text-sm font-medium">میانگین روزانه</p>
+                        <span class="w-8 h-8 rounded-lg bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                         </span>
                     </div>
                     <div class="relative z-10">
-                        <h3 id="avg-hours" class="text-2xl sm:text-3xl font-black text-white mb-1">۰۰:۰۰</h3>
-                        <p id="avg-tasks" class="text-gray-500 text-xs">۰ تسک در روز</p>
+                        <h3 id="avg-hours" class="text-2xl sm:text-3xl font-black text-main-color mb-1">۰۰:۰۰</h3>
+                        <p id="avg-tasks" class="text-muted-color text-xs">۰ تسک در روز</p>
                     </div>
                 </div>
             </div>
@@ -221,32 +269,31 @@
             <!-- Chart & Export -->
             <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-8 shadow-xl flex-shrink-0">
                 <div class="flex flex-col md:flex-row justify-between items-start mb-8 gap-4 no-print">
-                    <h3 class="text-lg sm:text-xl font-bold">توزیع زمان</h3>
+                    <h3 class="text-lg sm:text-xl font-bold text-main-color">توزیع زمان</h3>
                     <div class="flex flex-wrap gap-2">
-                        <button id="export-json" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-gray-300 hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">پشتیبان‌گیری (JSON)</button>
-                        <button id="import-json-btn" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-gray-300 hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">بازیابی (JSON)</button>
+                        <button id="export-json" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">پشتیبان‌گیری (JSON)</button>
+                        <button id="import-json-btn" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">بازیابی (JSON)</button>
                         <input type="file" id="import-json-input" accept=".json" class="hidden">
-                        <button id="export-csv" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-gray-300 hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">خروجی CSV</button>
-                        <button id="export-pdf" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-gray-300 hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">خروجی PDF</button>
+                        <button id="export-csv" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">خروجی CSV</button>
+                        <button id="export-pdf" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">خروجی PDF</button>
                     </div>
                 </div>
-                <div class="flex flex-col md:flex-row items-center gap-8 sm:gap-12">
+                <div class="flex justify-center">
                     <div class="relative w-40 h-40 sm:w-64 sm:h-64 no-print">
                         <svg id="donut-chart" viewBox="0 0 200 200" class="w-full h-full transform -rotate-90">
-                            <circle cx="100" cy="100" r="80" fill="none" stroke="#2a323d" stroke-width="20"></circle>
+                            <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(var(--c-border))" stroke-width="20"></circle>
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span class="text-xl sm:text-4xl font-black" id="chart-center-text">۰۰:۰۰</span>
-                            <span class="text-[10px] sm:text-xs text-gray-400 mt-1">کل زمان</span>
+                            <span class="text-xl sm:text-4xl font-black text-main-color" id="chart-center-text">۰۰:۰۰</span>
+                            <span class="text-[10px] sm:text-xs text-soft-color mt-1">کل زمان</span>
                         </div>
                     </div>
-                    <div id="chart-legend" class="flex-1 space-y-3 w-full"></div>
                 </div>
             </div>
 
             <!-- Daily Breakdown (Full Task Text) -->
             <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-8 shadow-xl flex-shrink-0">
-                <h3 class="text-lg sm:text-xl font-bold mb-6">گزارش روزانه</h3>
+                <h3 class="text-lg sm:text-xl font-bold mb-6 text-main-color">گزارش روزانه</h3>
                 <div id="daily-breakdown" class="space-y-4"></div>
             </div>
         </main>
@@ -257,8 +304,39 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const STORAGE_KEY = 'chronos_db_v4';
+            const THEME_KEY = 'chronos_theme';
             let state = { activeSession: null, sessions: [], filters: { text: '', from: null, to: null } };
 
+            // --- Theme Toggle Logic ---
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const iconDark = document.getElementById('theme-icon-dark');
+            const iconLight = document.getElementById('theme-icon-light');
+            const htmlEl = document.documentElement;
+
+            const applyTheme = (theme) => {
+                if (theme === 'light') {
+                    htmlEl.classList.add('light');
+                    iconLight.classList.add('hidden');
+                    iconDark.classList.remove('hidden');
+                } else {
+                    htmlEl.classList.remove('light');
+                    iconDark.classList.add('hidden');
+                    iconLight.classList.remove('hidden');
+                }
+            };
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+            applyTheme(savedTheme);
+
+            themeToggleBtn.addEventListener('click', () => {
+                const isLight = htmlEl.classList.contains('light');
+                const newTheme = isLight ? 'dark' : 'light';
+                applyTheme(newTheme);
+                localStorage.setItem(THEME_KEY, newTheme);
+            });
+
+            // --- State Management ---
             const loadState = () => {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
@@ -325,7 +403,7 @@
                 closeModal();
                 const overlay = document.createElement('div');
                 overlay.className = 'modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4';
-                overlay.innerHTML = `<div class="bg-panel border-2 border-emerald-glow/40 rounded-[20px] p-6 sm:p-8 w-full max-w-lg shadow-glow-strong relative">${contentHtml}</div>`;
+                overlay.innerHTML = `<div class="bg-panel border-2 border-emerald-glow/40 rounded-[20px] p-6 sm:p-8 w-full max-w-lg shadow-glow-strong relative text-main-color">${contentHtml}</div>`;
                 modalRoot.appendChild(overlay);
                 activeModal = overlay;
                 if (onMount) onMount(overlay);
@@ -354,14 +432,14 @@
                 if (view === 'reports') {
                     trackerView.classList.add('hidden'); trackerView.classList.remove('flex');
                     reportsView.classList.remove('hidden'); reportsView.classList.add('flex');
-                    tabTracker.classList.remove('bg-emerald-glow/15', 'text-emerald-glow'); tabTracker.classList.add('text-gray-400');
-                    tabReports.classList.add('bg-emerald-glow/15', 'text-emerald-glow'); tabReports.classList.remove('text-gray-400');
+                    tabTracker.classList.remove('bg-emerald-glow/15', 'text-emerald-glow'); tabTracker.classList.add('text-soft-color');
+                    tabReports.classList.add('bg-emerald-glow/15', 'text-emerald-glow'); tabReports.classList.remove('text-soft-color');
                     renderReports();
                 } else {
                     reportsView.classList.add('hidden'); reportsView.classList.remove('flex');
                     trackerView.classList.remove('hidden'); trackerView.classList.add('flex');
-                    tabReports.classList.remove('bg-emerald-glow/15', 'text-emerald-glow'); tabReports.classList.add('text-gray-400');
-                    tabTracker.classList.add('bg-emerald-glow/15', 'text-emerald-glow'); tabTracker.classList.remove('text-gray-400');
+                    tabReports.classList.remove('bg-emerald-glow/15', 'text-emerald-glow'); tabReports.classList.add('text-soft-color');
+                    tabTracker.classList.add('bg-emerald-glow/15', 'text-emerald-glow'); tabTracker.classList.remove('text-soft-color');
                     renderTracker();
                 }
             };
@@ -399,32 +477,36 @@
             document.getElementById('date-filter-btn').addEventListener('click', () => {
                 const html = `
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-white">فیلتر بازه تاریخی</h2>
-                        <button class="modal-close-x text-gray-400 hover:text-white">
+                        <h2 class="text-lg sm:text-xl font-bold text-main-color">فیلتر بازه تاریخی</h2>
+                        <button class="modal-close-x text-soft-color hover:text-main-color">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div>
-                            <label class="block text-xs text-gray-400 mb-2">از تاریخ (YYYY/MM/DD)</label>
-                            <input type="text" id="date-from-input" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-white focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۰۱">
+                            <label class="block text-xs text-soft-color mb-2">از تاریخ (YYYY/MM/DD)</label>
+                            <input type="text" id="date-from-input" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۰۱">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-2">تا تاریخ (YYYY/MM/DD)</label>
-                            <input type="text" id="date-to-input" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-white focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۳۱">
+                            <label class="block text-xs text-soft-color mb-2">تا تاریخ (YYYY/MM/DD)</label>
+                            <input type="text" id="date-to-input" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۳۱">
                         </div>
                     </div>
                     <div class="flex gap-4">
                         <button id="modal-apply-date" class="flex-1 py-3 rounded-xl bg-emerald-glow text-bg-main font-bold transition-all hover:opacity-90 active:scale-95 text-sm">اعمال فیلتر</button>
-                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-gray-300 font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
+                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
                     </div>
                 `;
                 openModal(html, (modal) => {
+                    const fromInput = modal.querySelector('#date-from-input');
+                    const toInput = modal.querySelector('#date-to-input');
+                    
                     modal.querySelector('.modal-close-x').onclick = closeModal;
                     modal.querySelector('.modal-cancel').onclick = closeModal;
-                    modal.querySelector('#modal-apply-date').onclick = () => {
-                        const fromVal = modal.querySelector('#date-from-input').value.trim();
-                        const toVal = modal.querySelector('#date-to-input').value.trim();
+
+                    const applyDateFilter = () => {
+                        const fromVal = fromInput.value.trim();
+                        const toVal = toInput.value.trim();
                         
                         try {
                             if (fromVal) {
@@ -449,6 +531,17 @@
                             alert("فرمت تاریخ نامعتبر است. مثال: ۱۴۰۳/۰۱/۰۱");
                         }
                     };
+
+                    modal.querySelector('#modal-apply-date').onclick = applyDateFilter;
+
+                    [fromInput, toInput].forEach(input => {
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                applyDateFilter();
+                            }
+                        });
+                    });
                 });
             });
 
@@ -470,7 +563,7 @@
                 const filteredSessions = getFilteredSessions();
 
                 if (filteredSessions.length === 0 && !state.activeSession) {
-                    sessionList.innerHTML = `<div class="text-center text-gray-500 py-20 text-sm">موردی یافت نشد.</div>`;
+                    sessionList.innerHTML = `<div class="text-center text-muted-color py-20 text-sm">موردی یافت نشد.</div>`;
                 } else {
                     filteredSessions.forEach(s => sessionList.appendChild(createRowElement(s, false)));
                 }
@@ -481,28 +574,28 @@
                 const row = document.createElement('div');
                 row.className = `session-row grid grid-cols-12 gap-2 px-2 sm:px-6 py-3 border-b border-border-main/50 transition-all text-xs sm:text-sm ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
                 
-                const dateCol = `<div class="col-span-2 sm:col-span-1 text-gray-300 font-medium pt-1">${formatSolarDate(session.startTime)}</div>`;
-                const taskCol = `<div class="col-span-7 sm:col-span-8 text-white whitespace-pre-wrap break-words leading-relaxed pt-1">${session.task || 'بدون توضیحات'}</div>`;
-                const startCol = `<div class="col-span-1 text-gray-400 pt-1">${formatTime(session.startTime)}</div>`;
+                const dateCol = `<div class="col-span-2 sm:col-span-1 text-soft-color font-medium pt-1">${formatSolarDate(session.startTime)}</div>`;
+                const taskCol = `<div class="col-span-7 sm:col-span-8 text-main-color whitespace-pre-wrap break-words leading-relaxed pt-1">${session.task || 'بدون توضیحات'}</div>`;
+                const startCol = `<div class="col-span-1 text-soft-color pt-1">${formatTime(session.startTime)}</div>`;
                 
                 let endCol;
                 if (isActive) {
-                    endCol = `<div class="col-span-1 pt-1"><span class="px-2 py-1 rounded-full bg-emerald-glow/15 text-emerald-glow text-[10px] sm:text-xs font-bold animate-pulse">در حال اجرا</span></div>`;
+                    endCol = `<div class="col-span-1 pt-1"><span class="px-2 py-1 rounded-lg bg-emerald-glow/15 text-emerald-glow text-[10px] sm:text-xs font-bold animate-pulse">در حال اجرا</span></div>`;
                 } else {
                     const dur = formatDuration(session.endTime - session.startTime);
-                    endCol = `<div class="col-span-1 text-gray-400 flex flex-col pt-1"><span>${formatTime(session.endTime)}</span><span class="text-[9px] sm:text-[10px] text-gray-500">(${toFa(dur)})</span></div>`;
+                    endCol = `<div class="col-span-1 text-soft-color flex flex-col pt-1"><span>${formatTime(session.endTime)}</span><span class="text-[9px] sm:text-[10px] text-muted-color">(${toFa(dur)})</span></div>`;
                 }
 
                 let actionCol = `<div class="col-span-1 text-left pl-1 pt-1"></div>`;
                 if (!isActive) {
                     actionCol = `
                         <div class="col-span-1 text-left pl-1 relative pt-1">
-                            <button class="action-menu-btn p-1 rounded-lg hover:bg-border-main text-gray-400 hover:text-white" data-id="${session.id}">
+                            <button class="action-menu-btn p-1 rounded-lg hover:bg-border-main text-soft-color hover:text-main-color" data-id="${session.id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
                             </button>
                             <div class="dropdown-menu absolute left-0 mt-1 w-28 bg-panel border border-border-main rounded-xl shadow-xl py-2 hidden z-20 text-right">
-                                <button class="edit-btn block w-full px-4 py-2 text-xs text-gray-300 hover:bg-bg-soft hover:text-emerald-glow" data-id="${session.id}">ویرایش</button>
-                                <button class="delete-btn block w-full px-4 py-2 text-xs text-gray-300 hover:bg-bg-soft hover:text-red-500" data-id="${session.id}">حذف</button>
+                                <button class="edit-btn block w-full px-4 py-2 text-xs text-soft-color hover:bg-bg-soft hover:text-emerald-glow" data-id="${session.id}">ویرایش</button>
+                                <button class="delete-btn block w-full px-4 py-2 text-xs text-soft-color hover:bg-bg-soft hover:text-red-500" data-id="${session.id}">حذف</button>
                             </div>
                         </div>`;
                 }
@@ -558,15 +651,15 @@
             const openTaskModal = () => {
                 const html = `
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-white">افزودن تسک / توضیحات</h2>
-                        <button class="modal-close-x text-gray-400 hover:text-white">
+                        <h2 class="text-lg sm:text-xl font-bold text-main-color">افزودن تسک / توضیحات</h2>
+                        <button class="modal-close-x text-soft-color hover:text-main-color">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
-                    <textarea id="task-input" rows="5" class="w-full bg-bg-soft border border-border-main rounded-xl p-4 text-white resize-none focus:outline-none focus:border-emerald-glow transition-colors mb-6 text-sm" placeholder="تسک‌های این نوبت کاری را وارد کنید..."></textarea>
+                    <textarea id="task-input" rows="5" class="w-full bg-bg-soft border border-border-main rounded-xl p-4 text-main-color resize-none focus:outline-none focus:border-emerald-glow transition-colors mb-6 text-sm" placeholder="تسک‌های این نوبت کاری را وارد کنید..."></textarea>
                     <div class="flex gap-4">
                         <button id="modal-confirm" class="flex-1 py-3 rounded-xl bg-emerald-glow text-bg-main font-bold transition-all hover:opacity-90 active:scale-95 text-sm">تایید و شروع</button>
-                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-gray-300 font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
+                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
                     </div>
                 `;
                 openModal(html, (modal) => {
@@ -574,6 +667,11 @@
                     modal.querySelector('.modal-close-x').onclick = closeModal;
                     modal.querySelector('.modal-cancel').onclick = closeModal;
                     taskInput.focus();
+
+                    function confirmTask() {
+                        state.activeSession = { id: Date.now(), startTime: Date.now(), task: taskInput.value.trim() };
+                        saveState(); closeModal(); renderTracker();
+                    }
 
                     taskInput.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
@@ -583,10 +681,6 @@
                     });
 
                     modal.querySelector('#modal-confirm').onclick = confirmTask;
-                    function confirmTask() {
-                        state.activeSession = { id: Date.now(), startTime: Date.now(), task: taskInput.value.trim() };
-                        saveState(); closeModal(); renderTracker();
-                    }
                 });
             };
 
@@ -611,41 +705,42 @@
 
                 const html = `
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-white">ویرایش نوبت کاری</h2>
-                        <button class="modal-close-x text-gray-400 hover:text-white">
+                        <h2 class="text-lg sm:text-xl font-bold text-main-color">ویرایش نوبت کاری</h2>
+                        <button class="modal-close-x text-soft-color hover:text-main-color">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
                     <div class="space-y-4 mb-6 text-sm">
                         <div>
-                            <label class="block text-xs text-gray-400 mb-2">تاریخ (YYYY/MM/DD)</label>
-                            <input type="text" id="edit-date" value="${editDateStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-white focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۱۵">
+                            <label class="block text-xs text-soft-color mb-2">تاریخ (YYYY/MM/DD)</label>
+                            <input type="text" id="edit-date" value="${editDateStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۱۵">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs text-gray-400 mb-2">ساعت شروع (HH:MM)</label>
-                                <input type="text" id="edit-start" value="${editStartStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-white focus:outline-none focus:border-emerald-glow" placeholder="۱۴:۳۰">
+                                <label class="block text-xs text-soft-color mb-2">ساعت شروع (HH:MM)</label>
+                                <input type="text" id="edit-start" value="${editStartStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۴:۳۰">
                             </div>
                             <div>
-                                <label class="block text-xs text-gray-400 mb-2">ساعت پایان (HH:MM)</label>
-                                <input type="text" id="edit-end" value="${editEndStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-white focus:outline-none focus:border-emerald-glow" placeholder="۱۶:۴۵">
+                                <label class="block text-xs text-soft-color mb-2">ساعت پایان (HH:MM)</label>
+                                <input type="text" id="edit-end" value="${editEndStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۶:۴۵">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-2">تسک‌ها / توضیحات</label>
-                            <textarea id="edit-task" rows="4" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-white resize-none focus:outline-none focus:border-emerald-glow">${session.task || ''}</textarea>
+                            <label class="block text-xs text-soft-color mb-2">تسک‌ها / توضیحات</label>
+                            <textarea id="edit-task" rows="4" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color resize-none focus:outline-none focus:border-emerald-glow">${session.task || ''}</textarea>
                         </div>
                     </div>
                     <div class="flex gap-4">
                         <button id="modal-save" class="flex-1 py-3 rounded-xl bg-emerald-glow text-bg-main font-bold transition-all hover:opacity-90 active:scale-95 text-sm">ذخیره تغییرات</button>
-                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-gray-300 font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
+                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
                     </div>
                 `;
 
                 openModal(html, (modal) => {
                     modal.querySelector('.modal-close-x').onclick = closeModal;
                     modal.querySelector('.modal-cancel').onclick = closeModal;
-                    modal.querySelector('#modal-save').onclick = () => {
+                    
+                    const saveChanges = () => {
                         try {
                             const dateParts = toEn(modal.querySelector('#edit-date').value.trim()).split('/').map(Number);
                             if (dateParts.length !== 3) throw new Error("تاریخ نامعتبر است");
@@ -670,20 +765,34 @@
                             alert("خطا در ذخیره سازی: " + err.message);
                         }
                     };
+
+                    modal.querySelector('#modal-save').onclick = saveChanges;
+
+                    modal.querySelectorAll('input, textarea').forEach(el => {
+                        el.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                                e.preventDefault();
+                                saveChanges();
+                            } else if (e.key === 'Enter' && e.target.tagName === 'TEXTAREA' && !e.shiftKey) {
+                                e.preventDefault();
+                                saveChanges();
+                            }
+                        });
+                    });
                 });
             };
 
             const openDeleteModal = (id) => {
                 const html = `
                     <div class="text-center">
-                        <div class="mx-auto flex items-center justify-center h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-red-500/10 border border-red-500/30 mb-6">
+                        <div class="mx-auto flex items-center justify-center h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-red-500/10 border border-red-500/30 mb-6">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </div>
-                        <h2 class="text-lg sm:text-xl font-bold text-white mb-2">حذف نوبت کاری</h2>
-                        <p class="text-gray-400 mb-8 text-sm">آیا از حذف این تسک مطمئن هستید؟ این عملیات غیرقابل بازگشت است.</p>
+                        <h2 class="text-lg sm:text-xl font-bold text-main-color mb-2">حذف نوبت کاری</h2>
+                        <p class="text-soft-color mb-8 text-sm">آیا از حذف این تسک مطمئن هستید؟ این عملیات غیرقابل بازگشت است.</p>
                         <div class="flex gap-4">
                             <button id="modal-delete" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold transition-all hover:opacity-90 active:scale-95 text-sm">بله، حذف شود</button>
-                            <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-gray-300 font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
+                            <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
                         </div>
                     </div>
                 `;
@@ -742,7 +851,6 @@
                     if (!dailyGroups[day]) dailyGroups[day] = [];
                     dailyGroups[day].push(s);
 
-                    // Fix: Removed substring limit to show full task name in chart
                     const taskName = s.task?.split('\n')[0]?.trim() || 'بدون عنوان';
                     taskData[taskName] = (taskData[taskName] || 0) + durMs;
                 });
@@ -771,12 +879,9 @@
 
             const renderDonutChart = (data, totalMs) => {
                 const svg = document.getElementById('donut-chart');
-                const legend = document.getElementById('chart-legend');
                 while (svg.childNodes.length > 1) svg.removeChild(svg.lastChild);
-                legend.innerHTML = '';
 
                 if (totalMs === 0) {
-                    legend.innerHTML = '<div class="text-gray-500 text-sm">داده‌ای برای نمایش وجود ندارد.</div>';
                     return;
                 }
 
@@ -796,17 +901,6 @@
                     circle.setAttribute('stroke-dashoffset', dashOffset);
                     svg.appendChild(circle);
 
-                    const legendItem = document.createElement('div');
-                    // Improved styling for long task names in legend
-                    legendItem.className = 'flex items-start justify-between gap-4 p-3 rounded-lg bg-bg-soft/50 border border-border-main text-xs sm:text-sm';
-                    legendItem.innerHTML = `
-                        <div class="flex items-start gap-3 flex-1 min-w-0">
-                            <span class="w-3 h-3 rounded-full mt-1 flex-shrink-0" style="background-color: ${colors[colorIndex % colors.length]}"></span>
-                            <span class="text-white break-words leading-relaxed">${name}</span>
-                        </div>
-                        <span class="text-gray-400 whitespace-nowrap mt-1 flex-shrink-0">${toFa(formatDuration(ms))} (${toFa((percentage * 100).toFixed(0))}٪)</span>
-                    `;
-                    legend.appendChild(legendItem);
                     cumulativePercentage += percentage;
                     colorIndex++;
                 });
@@ -819,7 +913,7 @@
                 const sortedDays = Object.keys(dailyGroups).sort((a, b) => dailyGroups[b][0].startTime - dailyGroups[a][0].startTime);
 
                 if (sortedDays.length === 0) {
-                    container.innerHTML = '<div class="text-gray-500 text-sm">داده‌ای برای نمایش وجود ندارد.</div>';
+                    container.innerHTML = '<div class="text-muted-color text-sm">داده‌ای برای نمایش وجود ندارد.</div>';
                     return;
                 }
 
@@ -833,8 +927,8 @@
                         dayMs += (end - s.startTime);
                         tasksHtml += `
                             <div class="py-2 border-b border-border-main/30 text-xs sm:text-sm flex justify-between gap-4">
-                                <span class="text-gray-300 flex-1 whitespace-pre-wrap break-words">${s.task || 'بدون توضیحات'}</span>
-                                <span class="text-gray-500 whitespace-nowrap mt-1">${formatTime(s.startTime)} تا ${s.endTime ? formatTime(s.endTime) : 'الان'}</span>
+                                <span class="text-soft-color flex-1 whitespace-pre-wrap break-words">${s.task || 'بدون توضیحات'}</span>
+                                <span class="text-muted-color whitespace-nowrap mt-1">${formatTime(s.startTime)} تا ${s.endTime ? formatTime(s.endTime) : 'الان'}</span>
                             </div>
                         `;
                     });
@@ -843,7 +937,7 @@
                         <div class="bg-bg-soft/30 border border-border-main rounded-xl p-4">
                             <div class="flex justify-between mb-2">
                                 <h4 class="text-sm sm:text-base font-bold text-emerald-glow">${day}</h4>
-                                <span class="text-xs text-gray-400">مدت زمان: ${toFa(formatDuration(dayMs))}</span>
+                                <span class="text-xs text-soft-color">مدت زمان: ${toFa(formatDuration(dayMs))}</span>
                             </div>
                             <div>${tasksHtml}</div>
                         </div>
