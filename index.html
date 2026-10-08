@@ -3,19 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>کرونوس (Chrono) | مدیریت زمان</title>
+    <title>کرونو (Chrono) | مدیریت زمان</title>
     
-    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300d285' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 6v6l4 2'/></svg>">
-    
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Vazirmatn Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-
+    
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -28,9 +23,7 @@
                         'border-main': 'rgb(var(--c-border) / <alpha-value>)',
                         'emerald-glow': 'rgb(var(--c-emerald) / <alpha-value>)',
                     },
-                    fontFamily: {
-                        'vazir': ['Vazirmatn', 'sans-serif'],
-                    },
+                    fontFamily: { 'vazir': ['Vazirmatn', 'sans-serif'] },
                     boxShadow: {
                         'glow': '0 0 16px rgba(0, 210, 133, 0.35)',
                         'glow-strong': '0 0 24px rgba(0, 210, 133, 0.6)',
@@ -49,104 +42,103 @@
         }
     </script>
 
-    <style>
-        :root {
-            --c-bg-main: 15 19 24; /* #0f1318 */
-            --c-bg-soft: 22 27 34; /* #161b22 */
-            --c-panel: 28 33 40;   /* #1c2128 */
-            --c-border: 42 50 61;  /* #2a323d */
-            --c-emerald: 0 210 133;/* #00d285 */
-            --c-text-main: 255 255 255;
-            --c-text-soft: 156 163 175; /* gray-400 */
-            --c-text-muted: 107 114 128; /* gray-500 */
-        }
-
-        html.light {
-            --c-bg-main: 240 245 250; /* #f0f5fa */
-            --c-bg-soft: 224 232 240; /* #e0e8f0 */
-            --c-panel: 255 255 255;   /* #ffffff */
-            --c-border: 203 213 225;  /* #cbd5e1 */
-            --c-emerald: 16 185 129; /* #10b981 */
-            --c-text-main: 15 23 42; /* slate-900 */
-            --c-text-soft: 71 85 105; /* slate-600 */
-            --c-text-muted: 100 116 139; /* slate-500 */
-        }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background-color: rgb(var(--c-bg-main));
-            background-image: radial-gradient(circle at 50% 0%, rgba(0, 210, 133, 0.05) 0%, transparent 50%);
-            color: rgb(var(--c-text-main));
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        
-        input, textarea, button {
-            font-family: 'Vazirmatn', sans-serif !important;
-        }
-
-        /* Hide Scrollbar but keep functionality */
-        ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Utility classes bound to variables */
-        .text-main-color { color: rgb(var(--c-text-main)); }
-        .text-soft-color { color: rgb(var(--c-text-soft)); }
-        .text-muted-color { color: rgb(var(--c-text-muted)); }
-
-        .modal-overlay {
-            background: rgba(15, 19, 24, 0.7);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-        html.light .modal-overlay {
-            background: rgba(240, 245, 250, 0.8);
-        }
-
-        .session-row {
-            min-height: 3.5rem; 
-            display: flex;
-            align-items: center;
-        }
-
-        @media print {
-            body * { visibility: hidden; }
-            #reports-view, #reports-view * { visibility: visible; }
-            #reports-view { position: absolute; right: 0; top: 0; width: 100%; background: white !important; color: black !important; }
-            .no-print { display: none !important; }
-            .print-card { border: 1px solid #ccc !important; box-shadow: none !important; background: white !important; color: black !important; }
-            .print-text { color: black !important; }
-            .print-emerald { color: #10b981 !important; }
-        }
-
-        /* Theme Switcher Icon */
-        .theme-toggle-btn svg {
-            transition: transform 0.3s ease;
-        }
-    </style>
+    <!-- لود فایل استایل ماژولار -->
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="h-screen flex flex-col">
 
-    <!-- Main Container -->
-    <div class="w-full max-w-[1320px] mx-auto px-2 sm:px-4 py-4 flex-1 flex flex-col min-h-0 overflow-hidden">
-        
-        <!-- Top Bar -->
-        <header class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4 flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-emerald-glow/10 border border-emerald-glow/30 flex items-center justify-center shadow-glow">
+    <!-- صفحه ورود -->
+    <div id="login-container" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-main">
+        <div class="w-full max-w-md bg-panel border border-border-main rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-emerald-glow/10 border border-emerald-glow/30 flex items-center justify-center shadow-glow">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-glow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-main-color">کرونوس <span class="text-emerald-glow text-xs sm:text-sm font-normal">(Chrono)</span></h1>
+                <div>
+                    <h2 class="text-xl font-bold text-main-color">ورود به کرونو</h2>
+                    <p class="text-xs text-soft-color">برای دسترسی اطلاعات حساب خود را وارد کنید</p>
+                </div>
+            </div>
+
+            <div id="login-error" class="hidden mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs"></div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-soft-color mb-2">نام کاربری</label>
+                    <input type="text" id="username-input" dir="ltr" required class="w-full h-11 bg-bg-main border border-border-main rounded-xl px-3 text-main-color text-sm text-left focus:outline-none focus:border-emerald-glow">
+                </div>
+                <div>
+                    <label class="block text-xs text-soft-color mb-2">رمز عبور</label>
+                    <input type="password" id="password-input" dir="ltr" required class="w-full h-11 bg-bg-main border border-border-main rounded-xl px-3 text-main-color text-sm text-left focus:outline-none focus:border-emerald-glow">
+                </div>
+                <button type="submit" class="w-full h-11 rounded-xl bg-emerald-glow text-bg-main font-bold text-sm shadow-glow hover:opacity-90 active:scale-95 transition-all">ورود</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- منوی کناری موبایل (تمام‌عرض و تمام‌قد) -->
+    <div id="mobile-sidebar" class="fixed inset-0 z-50 bg-bg-main flex flex-col p-6 transition-transform duration-300 transform translate-x-full md:hidden">
+        <div class="flex items-center justify-between pb-6 border-b border-border-main">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-glow/10 border border-emerald-glow/30 flex items-center justify-center shadow-glow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-glow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black text-main-color">کرونو <span class="text-emerald-glow text-xs font-normal">(Chrono)</span></h2>
+                    <div id="mob-user-info-text" class="text-xs text-soft-color"></div>
+                </div>
+            </div>
+            <button id="close-mobile-menu" class="p-2 text-soft-color hover:text-main-color">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <nav class="flex flex-col gap-3 py-6 flex-1">
+            <button id="mob-tab-tracker" class="w-full h-12 rounded-xl font-bold text-sm bg-emerald-glow/15 text-emerald-glow flex items-center px-4 transition-all">
+                ثبت زمان
+            </button>
+            <button id="mob-tab-reports" class="w-full h-12 rounded-xl font-bold text-sm text-soft-color bg-bg-soft flex items-center px-4 transition-all">
+                گزارش‌ها
+            </button>
+            <button id="mob-tab-users" class="hidden w-full h-12 rounded-xl font-bold text-sm text-soft-color bg-bg-soft flex items-center px-4 transition-all">
+                کاربران و همکاران
+            </button>
+        </nav>
+
+        <div class="pt-6 border-t border-border-main flex flex-col gap-3">
+            <button id="mob-theme-toggle" class="w-full h-11 rounded-xl bg-bg-soft text-soft-color text-sm font-medium flex items-center justify-center gap-2">
+                <span>تغییر حالت شب و روز</span>
+            </button>
+            <button id="mob-logout-btn" class="w-full h-11 rounded-xl bg-red-500/10 text-red-400 text-sm font-medium flex items-center justify-center gap-2">
+                <span>خروج از حساب</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- بدنه اصلی برنامه -->
+    <div id="app-container" class="hidden w-full max-w-[1320px] mx-auto px-2 sm:px-4 py-3 sm:py-4 flex-1 flex-col min-h-0 overflow-hidden">
+        
+        <header class="flex justify-between items-center mb-3 sm:mb-4 gap-2 sm:gap-4 flex-shrink-0">
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-glow/10 border border-emerald-glow/30 flex items-center justify-center shadow-glow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-glow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-black tracking-tight text-main-color">کرونو <span class="text-emerald-glow text-xs sm:text-sm font-normal">(Chrono)</span></h1>
+                    <div id="user-info-text" class="text-[11px] sm:text-xs text-soft-color font-normal"></div>
+                </div>
             </div>
             
-            <!-- Action Group: Toggle Button + Tabs + Theme Toggle -->
             <div class="flex items-center gap-2 sm:gap-3">
-                <button id="toggle-session-btn" class="h-10 px-5 rounded-xl bg-emerald-glow text-bg-main font-bold text-xs sm:text-sm shadow-glow transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 z-10">
+                <button id="toggle-session-btn" class="h-10 px-4 sm:px-5 rounded-xl bg-emerald-glow text-bg-main font-bold text-xs sm:text-sm shadow-glow transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1.5 sm:gap-2 z-10">
                     <span id="toggle-btn-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
@@ -155,17 +147,13 @@
                     <span id="toggle-btn-text">شروع نوبت</span>
                 </button>
 
-                <nav class="h-11 flex items-center gap-1 bg-panel border border-border-main rounded-xl p-1">
-                    <button id="tab-tracker" class="tab-btn h-9 px-5 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300 bg-emerald-glow/15 text-emerald-glow">
-                        ثبت زمان
-                    </button>
-                    <button id="tab-reports" class="tab-btn h-9 px-5 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300 text-soft-color hover:text-main-color">
-                        گزارش‌ها
-                    </button>
+                <nav class="hidden md:flex h-11 items-center gap-1 bg-panel border border-border-main rounded-xl p-1">
+                    <button id="tab-tracker" class="tab-btn h-9 px-4 sm:px-5 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300 bg-emerald-glow/15 text-emerald-glow">ثبت زمان</button>
+                    <button id="tab-reports" class="tab-btn h-9 px-4 sm:px-5 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300 text-soft-color hover:text-main-color">گزارش‌ها</button>
+                    <button id="tab-users" class="tab-btn hidden h-9 px-4 sm:px-5 rounded-lg font-bold text-xs sm:text-sm transition-all duration-300 text-soft-color hover:text-main-color">کاربران</button>
                 </nav>
 
-                <!-- Theme Toggle Button -->
-                <button id="theme-toggle-btn" class="theme-toggle-btn h-11 w-11 rounded-xl bg-panel border border-border-main text-soft-color hover:text-emerald-glow hover:border-emerald-glow transition-all duration-300 flex items-center justify-center">
+                <button id="theme-toggle-btn" class="hidden md:flex h-11 w-11 rounded-xl bg-panel border border-border-main text-soft-color hover:text-emerald-glow transition-all items-center justify-center">
                     <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                     </svg>
@@ -173,841 +161,163 @@
                         <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
                     </svg>
                 </button>
+
+                <button id="logout-btn" title="خروج از حساب" class="hidden md:flex h-11 w-11 rounded-xl bg-panel border border-border-main text-soft-color hover:text-red-400 hover:border-red-400/40 transition-all items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+
+                <button id="open-mobile-menu" class="md:hidden h-10 w-10 rounded-xl bg-panel border border-border-main text-soft-color flex items-center justify-center hover:text-emerald-glow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
             </div>
         </header>
 
-        <!-- Tracker View -->
+        <!-- تب ۱: ثبت زمان -->
         <main id="tracker-view" class="flex-1 flex flex-col min-h-0">
             <div class="bg-panel border border-border-main rounded-[20px] shadow-2xl flex flex-col flex-1 min-h-0 overflow-hidden">
-                
-                <!-- Search & Filter Bar -->
-                <div class="p-4 flex flex-col sm:flex-row gap-2 sm:gap-4 border-b border-border-main bg-bg-soft/30 flex-shrink-0">
-                    <input type="text" id="search-input" class="flex-1 h-11 bg-bg-main border border-border-main rounded-xl px-3 text-main-color text-sm focus:outline-none focus:border-emerald-glow" placeholder="جستجوی نام تسک (حداقل ۳ حرف)...">
-                    <button id="date-filter-btn" class="h-11 px-4 rounded-xl bg-bg-main border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-sm font-medium whitespace-nowrap">
-                        فیلتر بازه تاریخی
-                    </button>
-                    <button id="clear-filter-btn" class="hidden h-11 px-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all text-sm font-medium whitespace-nowrap">
-                        حذف فیلترها
-                    </button>
+                <div class="p-3 sm:p-4 flex flex-col sm:flex-row gap-2 sm:gap-4 border-b border-border-main bg-bg-soft/30 flex-shrink-0">
+                    <input type="search" id="search-input" name="user_search_field" autocomplete="new-password" class="search-field flex-1 bg-bg-main border border-border-main rounded-xl px-4 text-main-color text-sm focus:outline-none focus:border-emerald-glow" placeholder="جستجوی نام تسک (حداقل ۳ حرف)...">
+                    <div class="flex gap-2">
+                        <button id="date-filter-btn" class="flex-1 sm:flex-none h-12 px-4 rounded-xl bg-bg-main border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-xs sm:text-sm font-medium whitespace-nowrap">فیلتر بازه تاریخی</button>
+                        <button id="clear-filter-btn" class="hidden h-12 px-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all text-xs sm:text-sm font-medium whitespace-nowrap">حذف فیلترها</button>
+                    </div>
                 </div>
 
-                <div class="px-2 sm:px-6 py-3 border-b border-border-main bg-bg-soft/50 flex-shrink-0">
-                    <div class="grid grid-cols-12 gap-2 text-xs sm:text-sm text-muted-color font-medium">
-                        <div class="col-span-2 sm:col-span-1">تاریخ</div>
-                        <div class="col-span-7 sm:col-span-8">تسک‌ها / توضیحات</div>
-                        <div class="col-span-1">شروع</div>
-                        <div class="col-span-1">پایان (مدت)</div>
-                        <div class="col-span-1 text-left pl-2">عملیات</div>
+                <div class="px-3 sm:px-6 py-2.5 sm:py-3 border-b border-border-main bg-bg-soft/50 flex-shrink-0">
+                    <div class="flex items-center text-[11px] sm:text-sm text-muted-color font-medium">
+                        <div class="w-20 sm:w-28 flex-shrink-0">تاریخ</div>
+                        <div class="flex-1 px-3">تسک‌ها / توضیحات</div>
+                        <div class="w-16 sm:w-24 text-center flex-shrink-0">شروع</div>
+                        <div class="w-28 sm:w-36 text-center flex-shrink-0">پایان (مدت)</div>
+                        <div class="w-10 sm:w-12 text-left flex-shrink-0 pl-1">عملیات</div>
                     </div>
                 </div>
                 <div id="session-list" class="flex-1 overflow-y-auto min-h-0"></div>
             </div>
         </main>
 
-        <!-- Reports View -->
-        <main id="reports-view" class="hidden flex-1 flex-col min-h-0 overflow-y-auto pr-1 space-y-6">
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
-                <!-- Card 1: Total -->
-                <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
+        <!-- تب ۲: گزارش‌ها -->
+        <main id="reports-view" class="hidden flex-1 flex-col min-h-0 overflow-y-auto pr-1 space-y-4 sm:space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-shrink-0">
+                <!-- کارت اطلاعات کاربر و حساب -->
+                <div class="lg:col-span-6 print-card bg-panel border border-border-main rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col justify-between relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
-                    <div class="flex justify-between items-center relative z-10">
-                        <p class="text-soft-color text-sm font-medium">کل ساعت‌ها</p>
-                        <span class="w-8 h-8 rounded-lg bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </span>
-                    </div>
-                    <div class="relative z-10">
-                        <h3 id="total-hours" class="text-2xl sm:text-3xl font-black text-emerald-glow mb-1">۰۰:۰۰</h3>
-                        <p id="total-tasks" class="text-muted-color text-xs">۰ تسک ثبت شده</p>
+                    <div class="relative z-10 flex flex-col h-full justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-main/40 pb-3">
+                            <span class="px-3 py-1 rounded-lg bg-emerald-glow/15 text-emerald-glow text-xs font-bold w-fit">اطلاعات کاربری و حساب</span>
+                            <div class="flex flex-wrap items-center gap-1.5 no-print">
+                                <button id="change-pass-btn" class="px-2.5 py-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow text-xs font-medium">تغییر رمز</button>
+                                <button id="export-json-btn" class="hidden px-2.5 py-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow text-xs font-medium">پشتیبان JSON</button>
+                                <button id="import-json-btn" class="hidden px-2.5 py-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow text-xs font-medium">بازیابی JSON</button>
+                                <button id="export-csv" class="px-2.5 py-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow text-xs font-medium">خروجی CSV</button>
+                                <button id="export-pdf" class="px-2.5 py-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow text-xs font-medium">چاپ / PDF</button>
+                            </div>
+                        </div>
+                        <div class="space-y-2.5 sm:space-y-3.5">
+                            <div class="flex justify-between items-center border-b border-border-main/40 pb-2">
+                                <span class="text-xs text-soft-color">نام و نام خانوادگی</span>
+                                <span id="rep-user-fullname" class="text-xs sm:text-sm font-bold text-main-color">-</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-border-main/40 pb-2">
+                                <span class="text-xs text-soft-color">نام کاربری</span>
+                                <span id="rep-user-username" class="text-xs sm:text-sm font-medium text-main-color">-</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-border-main/40 pb-2">
+                                <span class="text-xs text-soft-color">سطح دسترسی</span>
+                                <span id="rep-user-role" class="text-xs sm:text-sm font-medium text-emerald-glow">-</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-soft-color">تاریخ عضویت</span>
+                                <span id="rep-user-created" class="text-xs sm:text-sm font-medium text-soft-color">-</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Card 2: Week -->
-                <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
-                    <div class="flex justify-between items-center relative z-10">
-                        <p class="text-soft-color text-sm font-medium">این هفته</p>
-                        <span class="w-8 h-8 rounded-lg bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        </span>
-                    </div>
-                    <div class="relative z-10">
-                        <h3 id="week-hours" class="text-2xl sm:text-3xl font-black text-main-color mb-1">۰۰:۰۰</h3>
-                        <p id="week-tasks" class="text-muted-color text-xs">۰ تسک ثبت شده</p>
-                    </div>
-                </div>
-                <!-- Card 3: Today -->
-                <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
-                    <div class="flex justify-between items-center relative z-10">
-                        <p class="text-soft-color text-sm font-medium">امروز</p>
-                        <span class="w-8 h-8 rounded-lg bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        </span>
-                    </div>
-                    <div class="relative z-10">
-                        <h3 id="today-hours" class="text-2xl sm:text-3xl font-black text-main-color mb-1">۰۰:۰۰</h3>
-                        <p id="today-tasks" class="text-muted-color text-xs">۰ تسک ثبت شده</p>
-                    </div>
-                </div>
-                <!-- Card 4: Average -->
-                <div class="print-card bg-panel border border-border-main rounded-2xl p-5 shadow-xl flex flex-col justify-between gap-6 hover:border-emerald-glow/40 transition-colors relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
-                    <div class="flex justify-between items-center relative z-10">
-                        <p class="text-soft-color text-sm font-medium">میانگین روزانه</p>
-                        <span class="w-8 h-8 rounded-lg bg-emerald-glow/10 flex items-center justify-center text-emerald-glow">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                        </span>
-                    </div>
-                    <div class="relative z-10">
-                        <h3 id="avg-hours" class="text-2xl sm:text-3xl font-black text-main-color mb-1">۰۰:۰۰</h3>
-                        <p id="avg-tasks" class="text-muted-color text-xs">۰ تسک در روز</p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Chart & Export -->
-            <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-8 shadow-xl flex-shrink-0">
-                <div class="flex flex-col md:flex-row justify-between items-start mb-8 gap-4 no-print">
-                    <h3 class="text-lg sm:text-xl font-bold text-main-color">توزیع زمان</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <button id="export-json" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">پشتیبان‌گیری (JSON)</button>
-                        <button id="import-json-btn" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">بازیابی (JSON)</button>
-                        <input type="file" id="import-json-input" accept=".json" class="hidden">
-                        <button id="export-csv" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">خروجی CSV</button>
-                        <button id="export-pdf" class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-bg-soft border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-[10px] sm:text-xs font-medium">خروجی PDF</button>
+                <!-- ۴ کارت آماری -->
+                <div class="lg:col-span-6 grid grid-cols-2 gap-3 sm:gap-4">
+                    <div class="print-card bg-panel border border-border-main rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col justify-between">
+                        <p class="text-soft-color text-xs sm:text-sm font-medium">کل ساعت‌ها</p>
+                        <div>
+                            <h3 id="total-hours" class="text-lg sm:text-2xl font-black text-emerald-glow mb-1">۰۰:۰۰</h3>
+                            <p id="total-tasks" class="text-muted-color text-[11px] sm:text-xs">۰ تسک ثبت شده</p>
+                        </div>
                     </div>
-                </div>
-                <div class="flex justify-center">
-                    <div class="relative w-40 h-40 sm:w-64 sm:h-64 no-print">
-                        <svg id="donut-chart" viewBox="0 0 200 200" class="w-full h-full transform -rotate-90">
-                            <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(var(--c-border))" stroke-width="20"></circle>
-                        </svg>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span class="text-xl sm:text-4xl font-black text-main-color" id="chart-center-text">۰۰:۰۰</span>
-                            <span class="text-[10px] sm:text-xs text-soft-color mt-1">کل زمان</span>
+                    <div class="print-card bg-panel border border-border-main rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col justify-between">
+                        <p class="text-soft-color text-xs sm:text-sm font-medium">این هفته</p>
+                        <div>
+                            <h3 id="week-hours" class="text-lg sm:text-2xl font-black text-main-color mb-1">۰۰:۰۰</h3>
+                            <p id="week-tasks" class="text-muted-color text-[11px] sm:text-xs">۰ تسک ثبت شده</p>
+                        </div>
+                    </div>
+                    <div class="print-card bg-panel border border-border-main rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col justify-between">
+                        <p class="text-soft-color text-xs sm:text-sm font-medium">میانگین روزانه</p>
+                        <div>
+                            <h3 id="avg-hours" class="text-lg sm:text-2xl font-black text-main-color mb-1">۰۰:۰۰</h3>
+                            <p id="avg-tasks" class="text-muted-color text-[11px] sm:text-xs">۰ تسک در روز</p>
+                        </div>
+                    </div>
+                    <div class="print-card bg-panel border border-border-main rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col justify-between">
+                        <p class="text-soft-color text-xs sm:text-sm font-medium">امروز</p>
+                        <div>
+                            <h3 id="today-hours" class="text-lg sm:text-2xl font-black text-main-color mb-1">۰۰:۰۰</h3>
+                            <p id="today-tasks" class="text-muted-color text-[11px] sm:text-xs">۰ تسک ثبت شده</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Daily Breakdown (Full Task Text) -->
-            <div class="print-card bg-panel border border-border-main rounded-[20px] p-4 sm:p-8 shadow-xl flex-shrink-0">
-                <h3 class="text-lg sm:text-xl font-bold mb-6 text-main-color">گزارش روزانه</h3>
-                <div id="daily-breakdown" class="space-y-4"></div>
+            <!-- بخش گزارش روزانه نوبت‌ها -->
+            <div class="print-card bg-panel border border-border-main rounded-[20px] shadow-xl flex-shrink-0 overflow-hidden">
+                <div class="p-3 sm:p-4 flex flex-col sm:flex-row gap-2 sm:gap-4 border-b border-border-main bg-bg-soft/30 flex-shrink-0 no-print">
+                    <input type="search" id="report-search-input" name="report_search_query" autocomplete="new-password" class="search-field flex-1 bg-bg-main border border-border-main rounded-xl px-4 text-main-color text-sm focus:outline-none focus:border-emerald-glow" placeholder="جستجوی در تسک‌های گزارش (حداقل ۳ حرف)...">
+                    <div class="flex gap-2">
+                        <button id="report-date-filter-btn" class="flex-1 sm:flex-none h-12 px-4 rounded-xl bg-bg-main border border-border-main text-soft-color hover:border-emerald-glow hover:text-emerald-glow transition-all text-xs sm:text-sm font-medium whitespace-nowrap">فیلتر بازه تاریخی</button>
+                        <button id="report-clear-filter-btn" class="hidden h-12 px-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all text-xs sm:text-sm font-medium whitespace-nowrap">حذف فیلترها</button>
+                    </div>
+                </div>
+                <div class="p-4 sm:p-6">
+                    <h3 class="text-sm sm:text-lg font-bold mb-4 sm:mb-6 text-main-color">گزارش روزانه نوبت‌ها</h3>
+                    <div id="daily-breakdown" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- تب ۳: کاربران و همکاران -->
+        <main id="users-view" class="hidden flex-1 flex-col min-h-0 overflow-y-auto pr-1 space-y-4 sm:space-y-6">
+            <div class="flex justify-between items-center bg-panel border border-border-main rounded-2xl p-4 flex-shrink-0">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-main-color">فهرست همکاران</h3>
+                    <p class="text-xs text-soft-color">مشاهده گزارش همکاران مجاز و وضعیت نوبت جاری</p>
+                </div>
+                <button id="add-user-btn" class="hidden h-10 px-4 rounded-xl bg-emerald-glow text-bg-main font-bold text-xs sm:text-sm shadow-glow hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 sm:gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>افزودن کاربر</span>
+                </button>
+            </div>
+
+            <div class="bg-panel border border-border-main rounded-2xl shadow-xl overflow-hidden flex-shrink-0">
+                <div class="px-4 sm:px-6 py-3 border-b border-border-main bg-bg-soft/50 flex items-center justify-between text-xs font-semibold text-muted-color">
+                    <div class="w-36 sm:w-44">نام و نام خانوادگی</div>
+                    <div class="hidden sm:block flex-1 px-4">نام کاربری</div>
+                    <div class="w-20 text-center">وضعیت</div>
+                    <div class="w-36 sm:w-48 text-left">عملیات</div>
+                </div>
+                <div id="user-table-body" class="divide-y divide-border-main/40"></div>
             </div>
         </main>
     </div>
 
+    <!-- ریشه لایه‌های مودال -->
     <div id="modal-root"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'chronos_db_v4';
-            const THEME_KEY = 'chronos_theme';
-            let state = { activeSession: null, sessions: [], filters: { text: '', from: null, to: null } };
-
-            // --- Theme Toggle Logic ---
-            const themeToggleBtn = document.getElementById('theme-toggle-btn');
-            const iconDark = document.getElementById('theme-icon-dark');
-            const iconLight = document.getElementById('theme-icon-light');
-            const htmlEl = document.documentElement;
-
-            const applyTheme = (theme) => {
-                if (theme === 'light') {
-                    htmlEl.classList.add('light');
-                    iconLight.classList.add('hidden');
-                    iconDark.classList.remove('hidden');
-                } else {
-                    htmlEl.classList.remove('light');
-                    iconDark.classList.add('hidden');
-                    iconLight.classList.remove('hidden');
-                }
-            };
-
-            // Load saved theme
-            const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
-            applyTheme(savedTheme);
-
-            themeToggleBtn.addEventListener('click', () => {
-                const isLight = htmlEl.classList.contains('light');
-                const newTheme = isLight ? 'dark' : 'light';
-                applyTheme(newTheme);
-                localStorage.setItem(THEME_KEY, newTheme);
-            });
-
-            // --- State Management ---
-            const loadState = () => {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    state.activeSession = parsed.activeSession || null;
-                    state.sessions = parsed.sessions || [];
-                }
-            };
-
-            const saveState = () => localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeSession: state.activeSession, sessions: state.sessions }));
-
-            const toFa = (str) => str === null || str === undefined ? '' : str.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-            const toEn = (str) => !str ? '' : str.toString().replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-
-            const formatSolarDate = (ts) => {
-                try { return new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ts)).replace(/-/g, '/'); } 
-                catch (e) { return toFa(new Date(ts).toLocaleDateString('fa-IR')); }
-            };
-
-            const formatTime = (ts) => toFa(new Intl.DateTimeFormat('fa-IR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(ts)));
-
-            const formatDuration = (ms) => {
-                if (ms < 0) ms = 0;
-                let totalMinutes = Math.floor(ms / 60000);
-                const h = Math.floor(totalMinutes / 60);
-                const m = totalMinutes % 60;
-                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            };
-
-            function jalaaliToGregorian(jy, jm, jd) {
-                jy = Number(toEn(jy)); jm = Number(toEn(jm)); jd = Number(toEn(jd));
-                let gy = (jy <= 979) ? 621 : 1600;
-                jy -= (jy <= 979) ? 0 : 979;
-                let days = (365 * jy) + (Math.floor(jy / 33) * 8) + Math.floor((jy % 33 + 3) / 4) + 78 + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
-                gy += 400 * Math.floor(days / 146097);
-                days %= 146097;
-                if (days > 36524) { gy += 100 * Math.floor(--days / 36524); days %= 36524; if (days >= 365) days++; }
-                gy += 4 * Math.floor(days / 1461); days %= 1461;
-                if (days > 365) { gy += Math.floor((days - 1) / 365); days = (days - 1) % 365; }
-                let gd = days + 1;
-                let sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-                let gm = 0;
-                for (gm = 0; gm < 13 && gd > sal_a[gm]; gm++) gd -= sal_a[gm];
-                return new Date(gy, gm - 1, gd);
-            }
-
-            document.addEventListener('input', (e) => {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                    const start = e.target.selectionStart;
-                    const end = e.target.selectionEnd;
-                    const originalVal = e.target.value;
-                    const newVal = toFa(originalVal);
-                    if (originalVal !== newVal) {
-                        e.target.value = newVal;
-                        e.target.setSelectionRange(start, end);
-                    }
-                }
-            });
-
-            const modalRoot = document.getElementById('modal-root');
-            let activeModal = null;
-
-            const openModal = (contentHtml, onMount) => {
-                closeModal();
-                const overlay = document.createElement('div');
-                overlay.className = 'modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4';
-                overlay.innerHTML = `<div class="bg-panel border-2 border-emerald-glow/40 rounded-[20px] p-6 sm:p-8 w-full max-w-lg shadow-glow-strong relative text-main-color">${contentHtml}</div>`;
-                modalRoot.appendChild(overlay);
-                activeModal = overlay;
-                if (onMount) onMount(overlay);
-            };
-
-            const closeModal = () => {
-                if (activeModal) { activeModal.remove(); activeModal = null; }
-            };
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && activeModal) closeModal();
-            });
-
-            const tabTracker = document.getElementById('tab-tracker');
-            const tabReports = document.getElementById('tab-reports');
-            const trackerView = document.getElementById('tracker-view');
-            const reportsView = document.getElementById('reports-view');
-            const sessionList = document.getElementById('session-list');
-            const toggleBtn = document.getElementById('toggle-session-btn');
-            const toggleBtnText = document.getElementById('toggle-btn-text');
-            const toggleBtnIcon = document.getElementById('toggle-btn-icon');
-            const searchInput = document.getElementById('search-input');
-            const clearFilterBtn = document.getElementById('clear-filter-btn');
-
-            const switchView = (view) => {
-                if (view === 'reports') {
-                    trackerView.classList.add('hidden'); trackerView.classList.remove('flex');
-                    reportsView.classList.remove('hidden'); reportsView.classList.add('flex');
-                    tabTracker.classList.remove('bg-emerald-glow/15', 'text-emerald-glow'); tabTracker.classList.add('text-soft-color');
-                    tabReports.classList.add('bg-emerald-glow/15', 'text-emerald-glow'); tabReports.classList.remove('text-soft-color');
-                    renderReports();
-                } else {
-                    reportsView.classList.add('hidden'); reportsView.classList.remove('flex');
-                    trackerView.classList.remove('hidden'); trackerView.classList.add('flex');
-                    tabReports.classList.remove('bg-emerald-glow/15', 'text-emerald-glow'); tabReports.classList.add('text-soft-color');
-                    tabTracker.classList.add('bg-emerald-glow/15', 'text-emerald-glow'); tabTracker.classList.remove('text-soft-color');
-                    renderTracker();
-                }
-            };
-
-            tabTracker.addEventListener('click', () => switchView('tracker'));
-            tabReports.addEventListener('click', () => switchView('reports'));
-
-            // --- Filtering Logic ---
-            const getFilteredSessions = () => {
-                let sessions = [...state.sessions].reverse();
-                const { text, from, to } = state.filters;
-
-                if (text && text.length >= 3) {
-                    sessions = sessions.filter(s => s.task?.includes(text));
-                }
-
-                if (from && to) {
-                    sessions = sessions.filter(s => s.startTime >= from && s.startTime <= to);
-                }
-
-                return sessions;
-            };
-
-            searchInput.addEventListener('input', (e) => {
-                state.filters.text = e.target.value.trim();
-                renderTracker();
-            });
-
-            clearFilterBtn.addEventListener('click', () => {
-                state.filters = { text: '', from: null, to: null };
-                searchInput.value = '';
-                renderTracker();
-            });
-
-            document.getElementById('date-filter-btn').addEventListener('click', () => {
-                const html = `
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-main-color">فیلتر بازه تاریخی</h2>
-                        <button class="modal-close-x text-soft-color hover:text-main-color">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <label class="block text-xs text-soft-color mb-2">از تاریخ (YYYY/MM/DD)</label>
-                            <input type="text" id="date-from-input" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۰۱">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-soft-color mb-2">تا تاریخ (YYYY/MM/DD)</label>
-                            <input type="text" id="date-to-input" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۳۱">
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <button id="modal-apply-date" class="flex-1 py-3 rounded-xl bg-emerald-glow text-bg-main font-bold transition-all hover:opacity-90 active:scale-95 text-sm">اعمال فیلتر</button>
-                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
-                    </div>
-                `;
-                openModal(html, (modal) => {
-                    const fromInput = modal.querySelector('#date-from-input');
-                    const toInput = modal.querySelector('#date-to-input');
-                    
-                    modal.querySelector('.modal-close-x').onclick = closeModal;
-                    modal.querySelector('.modal-cancel').onclick = closeModal;
-
-                    const applyDateFilter = () => {
-                        const fromVal = fromInput.value.trim();
-                        const toVal = toInput.value.trim();
-                        
-                        try {
-                            if (fromVal) {
-                                const [jy, jm, jd] = toEn(fromVal).split('/').map(Number);
-                                state.filters.from = jalaaliToGregorian(jy, jm, jd).getTime();
-                            } else {
-                                state.filters.from = null;
-                            }
-                            
-                            if (toVal) {
-                                const [jy, jm, jd] = toEn(toVal).split('/').map(Number);
-                                let gDate = jalaaliToGregorian(jy, jm, jd);
-                                gDate.setHours(23, 59, 59, 999);
-                                state.filters.to = gDate.getTime();
-                            } else {
-                                state.filters.to = null;
-                            }
-                            
-                            closeModal();
-                            renderTracker();
-                        } catch (err) {
-                            alert("فرمت تاریخ نامعتبر است. مثال: ۱۴۰۳/۰۱/۰۱");
-                        }
-                    };
-
-                    modal.querySelector('#modal-apply-date').onclick = applyDateFilter;
-
-                    [fromInput, toInput].forEach(input => {
-                        input.addEventListener('keydown', (e) => {
-                            if (e.key === 'Enter') {
-                                e.preventDefault();
-                                applyDateFilter();
-                            }
-                        });
-                    });
-                });
-            });
-
-            // --- Tracker Logic ---
-            const renderTracker = () => {
-                sessionList.innerHTML = '';
-                
-                if (state.filters.text || state.filters.from || state.filters.to) {
-                    clearFilterBtn.classList.remove('hidden');
-                    clearFilterBtn.classList.add('block');
-                } else {
-                    clearFilterBtn.classList.add('hidden');
-                }
-
-                if (state.activeSession && !state.filters.text && !state.filters.from) {
-                    sessionList.appendChild(createRowElement(state.activeSession, true));
-                }
-
-                const filteredSessions = getFilteredSessions();
-
-                if (filteredSessions.length === 0 && !state.activeSession) {
-                    sessionList.innerHTML = `<div class="text-center text-muted-color py-20 text-sm">موردی یافت نشد.</div>`;
-                } else {
-                    filteredSessions.forEach(s => sessionList.appendChild(createRowElement(s, false)));
-                }
-                updateToggleButton();
-            };
-
-            const createRowElement = (session, isActive) => {
-                const row = document.createElement('div');
-                row.className = `session-row grid grid-cols-12 gap-2 px-2 sm:px-6 py-3 border-b border-border-main/50 transition-all text-xs sm:text-sm ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
-                
-                const dateCol = `<div class="col-span-2 sm:col-span-1 text-soft-color font-medium pt-1">${formatSolarDate(session.startTime)}</div>`;
-                const taskCol = `<div class="col-span-7 sm:col-span-8 text-main-color whitespace-pre-wrap break-words leading-relaxed pt-1">${session.task || 'بدون توضیحات'}</div>`;
-                const startCol = `<div class="col-span-1 text-soft-color pt-1">${formatTime(session.startTime)}</div>`;
-                
-                let endCol;
-                if (isActive) {
-                    endCol = `<div class="col-span-1 pt-1"><span class="px-2 py-1 rounded-lg bg-emerald-glow/15 text-emerald-glow text-[10px] sm:text-xs font-bold animate-pulse">در حال اجرا</span></div>`;
-                } else {
-                    const dur = formatDuration(session.endTime - session.startTime);
-                    endCol = `<div class="col-span-1 text-soft-color flex flex-col pt-1"><span>${formatTime(session.endTime)}</span><span class="text-[9px] sm:text-[10px] text-muted-color">(${toFa(dur)})</span></div>`;
-                }
-
-                let actionCol = `<div class="col-span-1 text-left pl-1 pt-1"></div>`;
-                if (!isActive) {
-                    actionCol = `
-                        <div class="col-span-1 text-left pl-1 relative pt-1">
-                            <button class="action-menu-btn p-1 rounded-lg hover:bg-border-main text-soft-color hover:text-main-color" data-id="${session.id}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
-                            </button>
-                            <div class="dropdown-menu absolute left-0 mt-1 w-28 bg-panel border border-border-main rounded-xl shadow-xl py-2 hidden z-20 text-right">
-                                <button class="edit-btn block w-full px-4 py-2 text-xs text-soft-color hover:bg-bg-soft hover:text-emerald-glow" data-id="${session.id}">ویرایش</button>
-                                <button class="delete-btn block w-full px-4 py-2 text-xs text-soft-color hover:bg-bg-soft hover:text-red-500" data-id="${session.id}">حذف</button>
-                            </div>
-                        </div>`;
-                }
-
-                row.innerHTML = `${dateCol}${taskCol}${startCol}${endCol}${actionCol}`;
-                return row;
-            };
-
-            sessionList.addEventListener('click', (e) => {
-                const menuBtn = e.target.closest('.action-menu-btn');
-                const editBtn = e.target.closest('.edit-btn');
-                const deleteBtn = e.target.closest('.delete-btn');
-
-                if (menuBtn) {
-                    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
-                    menuBtn.nextElementSibling.classList.toggle('hidden');
-                    e.stopPropagation();
-                } else if (editBtn) {
-                    openEditModal(Number(editBtn.dataset.id));
-                } else if (deleteBtn) {
-                    openDeleteModal(Number(deleteBtn.dataset.id));
-                } else {
-                    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
-                }
-            });
-
-            const updateToggleButton = () => {
-                if (state.activeSession) {
-                    toggleBtnText.textContent = 'پایان نوبت';
-                    toggleBtnIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.5 7.5a3 3 0 013-3h9a3 3 0 013 3v9a3 3 0 01-3 3h-9a3 3 0 01-3-3v-9z" clip-rule="evenodd" /></svg>`;
-                    toggleBtn.classList.add('animate-pulse-glow', 'shadow-glow-strong');
-                    toggleBtn.classList.remove('shadow-glow');
-                } else {
-                    toggleBtnText.textContent = 'شروع نوبت';
-                    toggleBtnIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>`;
-                    toggleBtn.classList.remove('animate-pulse-glow', 'shadow-glow-strong');
-                    toggleBtn.classList.add('shadow-glow');
-                }
-            };
-
-            toggleBtn.addEventListener('click', () => {
-                if (state.activeSession) {
-                    state.activeSession.endTime = Date.now();
-                    state.sessions.push(state.activeSession);
-                    state.activeSession = null;
-                    saveState();
-                    renderTracker();
-                } else {
-                    openTaskModal();
-                }
-            });
-
-            const openTaskModal = () => {
-                const html = `
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-main-color">افزودن تسک / توضیحات</h2>
-                        <button class="modal-close-x text-soft-color hover:text-main-color">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                    </div>
-                    <textarea id="task-input" rows="5" class="w-full bg-bg-soft border border-border-main rounded-xl p-4 text-main-color resize-none focus:outline-none focus:border-emerald-glow transition-colors mb-6 text-sm" placeholder="تسک‌های این نوبت کاری را وارد کنید..."></textarea>
-                    <div class="flex gap-4">
-                        <button id="modal-confirm" class="flex-1 py-3 rounded-xl bg-emerald-glow text-bg-main font-bold transition-all hover:opacity-90 active:scale-95 text-sm">تایید و شروع</button>
-                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
-                    </div>
-                `;
-                openModal(html, (modal) => {
-                    const taskInput = modal.querySelector('#task-input');
-                    modal.querySelector('.modal-close-x').onclick = closeModal;
-                    modal.querySelector('.modal-cancel').onclick = closeModal;
-                    taskInput.focus();
-
-                    function confirmTask() {
-                        state.activeSession = { id: Date.now(), startTime: Date.now(), task: taskInput.value.trim() };
-                        saveState(); closeModal(); renderTracker();
-                    }
-
-                    taskInput.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            confirmTask();
-                        }
-                    });
-
-                    modal.querySelector('#modal-confirm').onclick = confirmTask;
-                });
-            };
-
-            const openEditModal = (id) => {
-                const session = state.sessions.find(s => s.id === id);
-                if (!session) return;
-
-                const startDate = new Date(session.startTime);
-                const endDate = new Date(session.endTime);
-                
-                const parts = new Intl.DateTimeFormat('en-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(startDate);
-                let jy = '', jm = '', jd = '';
-                parts.forEach(p => {
-                    if (p.type === 'year') jy = p.value;
-                    if (p.type === 'month') jm = p.value;
-                    if (p.type === 'day') jd = p.value;
-                });
-                const editDateStr = toFa(`${jy}/${jm}/${jd}`);
-                
-                const editStartStr = toFa(`${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`);
-                const editEndStr = toFa(`${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`);
-
-                const html = `
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-main-color">ویرایش نوبت کاری</h2>
-                        <button class="modal-close-x text-soft-color hover:text-main-color">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                    </div>
-                    <div class="space-y-4 mb-6 text-sm">
-                        <div>
-                            <label class="block text-xs text-soft-color mb-2">تاریخ (YYYY/MM/DD)</label>
-                            <input type="text" id="edit-date" value="${editDateStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۴۰۳/۰۱/۱۵">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs text-soft-color mb-2">ساعت شروع (HH:MM)</label>
-                                <input type="text" id="edit-start" value="${editStartStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۴:۳۰">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-soft-color mb-2">ساعت پایان (HH:MM)</label>
-                                <input type="text" id="edit-end" value="${editEndStr}" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color focus:outline-none focus:border-emerald-glow" placeholder="۱۶:۴۵">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-soft-color mb-2">تسک‌ها / توضیحات</label>
-                            <textarea id="edit-task" rows="4" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color resize-none focus:outline-none focus:border-emerald-glow">${session.task || ''}</textarea>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <button id="modal-save" class="flex-1 py-3 rounded-xl bg-emerald-glow text-bg-main font-bold transition-all hover:opacity-90 active:scale-95 text-sm">ذخیره تغییرات</button>
-                        <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
-                    </div>
-                `;
-
-                openModal(html, (modal) => {
-                    modal.querySelector('.modal-close-x').onclick = closeModal;
-                    modal.querySelector('.modal-cancel').onclick = closeModal;
-                    
-                    const saveChanges = () => {
-                        try {
-                            const dateParts = toEn(modal.querySelector('#edit-date').value.trim()).split('/').map(Number);
-                            if (dateParts.length !== 3) throw new Error("تاریخ نامعتبر است");
-                            const gregorianDate = jalaaliToGregorian(dateParts[0], dateParts[1], dateParts[2]);
-                            const year = gregorianDate.getFullYear();
-                            const month = gregorianDate.getMonth();
-                            const day = gregorianDate.getDate();
-
-                            const startParts = toEn(modal.querySelector('#edit-start').value.trim()).split(':').map(Number);
-                            const endParts = toEn(modal.querySelector('#edit-end').value.trim()).split(':').map(Number);
-
-                            const newStart = new Date(year, month, day, startParts[0] || 0, startParts[1] || 0).getTime();
-                            const newEnd = new Date(year, month, day, endParts[0] || 0, endParts[1] || 0).getTime();
-
-                            if (newEnd <= newStart) throw new Error("زمان پایان باید بعد از شروع باشد");
-
-                            session.startTime = newStart;
-                            session.endTime = newEnd;
-                            session.task = modal.querySelector('#edit-task').value.trim();
-                            saveState(); closeModal(); renderTracker();
-                        } catch (err) {
-                            alert("خطا در ذخیره سازی: " + err.message);
-                        }
-                    };
-
-                    modal.querySelector('#modal-save').onclick = saveChanges;
-
-                    modal.querySelectorAll('input, textarea').forEach(el => {
-                        el.addEventListener('keydown', (e) => {
-                            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                                e.preventDefault();
-                                saveChanges();
-                            } else if (e.key === 'Enter' && e.target.tagName === 'TEXTAREA' && !e.shiftKey) {
-                                e.preventDefault();
-                                saveChanges();
-                            }
-                        });
-                    });
-                });
-            };
-
-            const openDeleteModal = (id) => {
-                const html = `
-                    <div class="text-center">
-                        <div class="mx-auto flex items-center justify-center h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-red-500/10 border border-red-500/30 mb-6">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </div>
-                        <h2 class="text-lg sm:text-xl font-bold text-main-color mb-2">حذف نوبت کاری</h2>
-                        <p class="text-soft-color mb-8 text-sm">آیا از حذف این تسک مطمئن هستید؟ این عملیات غیرقابل بازگشت است.</p>
-                        <div class="flex gap-4">
-                            <button id="modal-delete" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold transition-all hover:opacity-90 active:scale-95 text-sm">بله، حذف شود</button>
-                            <button class="modal-cancel flex-1 py-3 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-sm">انصراف</button>
-                        </div>
-                    </div>
-                `;
-                openModal(html, (modal) => {
-                    modal.querySelector('.modal-cancel').onclick = closeModal;
-                    modal.querySelector('#modal-delete').onclick = () => {
-                        state.sessions = state.sessions.filter(s => s.id !== id);
-                        saveState(); closeModal(); renderTracker();
-                    };
-                });
-            };
-
-            // --- Reports Logic ---
-            const isToday = (ts) => new Date(ts).toDateString() === new Date().toDateString();
-            
-            const getStartOfWeek = (ts) => {
-                const d = new Date(ts);
-                const day = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-                const diff = (day === 6) ? 0 : day + 1; // If Saturday(6), diff is 0. If Sunday(0), diff is 1.
-                d.setDate(d.getDate() - diff);
-                d.setHours(0, 0, 0, 0);
-                return d.getTime();
-            };
-
-            const renderReports = () => {
-                const allSessions = [...state.sessions];
-                if (state.activeSession) allSessions.push(state.activeSession);
-
-                let totalMs = 0, weekMs = 0, todayMs = 0;
-                let totalTasks = allSessions.length;
-                let weekTasks = 0, todayTasks = 0;
-                const dailyData = {};
-                const taskData = {};
-                const dailyGroups = {};
-
-                const weekStart = getStartOfWeek(Date.now());
-
-                allSessions.forEach(s => {
-                    const end = s.endTime || Date.now();
-                    const durMs = end - s.startTime;
-                    totalMs += durMs;
-                    
-                    if (s.startTime >= weekStart) {
-                        weekMs += durMs;
-                        weekTasks++;
-                    }
-                    
-                    if (isToday(s.startTime)) {
-                        todayMs += durMs;
-                        todayTasks++;
-                    }
-
-                    const day = formatSolarDate(s.startTime);
-                    dailyData[day] = (dailyData[day] || 0) + durMs;
-                    
-                    if (!dailyGroups[day]) dailyGroups[day] = [];
-                    dailyGroups[day].push(s);
-
-                    const taskName = s.task?.split('\n')[0]?.trim() || 'بدون عنوان';
-                    taskData[taskName] = (taskData[taskName] || 0) + durMs;
-                });
-
-                const uniqueDays = Object.keys(dailyData).length;
-                const avgMs = uniqueDays > 0 ? (totalMs / uniqueDays) : 0;
-                const avgTasks = uniqueDays > 0 ? Math.round(totalTasks / uniqueDays) : 0;
-
-                document.getElementById('total-hours').textContent = toFa(formatDuration(totalMs));
-                document.getElementById('total-tasks').textContent = `${toFa(totalTasks)} تسک ثبت شده`;
-                
-                document.getElementById('week-hours').textContent = toFa(formatDuration(weekMs));
-                document.getElementById('week-tasks').textContent = `${toFa(weekTasks)} تسک ثبت شده`;
-                
-                document.getElementById('today-hours').textContent = toFa(formatDuration(todayMs));
-                document.getElementById('today-tasks').textContent = `${toFa(todayTasks)} تسک ثبت شده`;
-                
-                document.getElementById('avg-hours').textContent = toFa(formatDuration(avgMs));
-                document.getElementById('avg-tasks').textContent = `${toFa(avgTasks)} تسک در روز`;
-                
-                document.getElementById('chart-center-text').textContent = toFa(formatDuration(totalMs));
-
-                renderDonutChart(taskData, totalMs);
-                renderDailyBreakdown(dailyGroups);
-            };
-
-            const renderDonutChart = (data, totalMs) => {
-                const svg = document.getElementById('donut-chart');
-                while (svg.childNodes.length > 1) svg.removeChild(svg.lastChild);
-
-                if (totalMs === 0) {
-                    return;
-                }
-
-                const colors = ['#00d285', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
-                let cumulativePercentage = 0;
-                let colorIndex = 0;
-
-                Object.entries(data).forEach(([name, ms]) => {
-                    const percentage = ms / totalMs;
-                    const dashArray = `${percentage * 502.4} 502.4`; 
-                    const dashOffset = -cumulativePercentage * 502.4;
-                    
-                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    circle.setAttribute('cx', '100'); circle.setAttribute('cy', '100'); circle.setAttribute('r', '80');
-                    circle.setAttribute('fill', 'none'); circle.setAttribute('stroke', colors[colorIndex % colors.length]);
-                    circle.setAttribute('stroke-width', '20'); circle.setAttribute('stroke-dasharray', dashArray);
-                    circle.setAttribute('stroke-dashoffset', dashOffset);
-                    svg.appendChild(circle);
-
-                    cumulativePercentage += percentage;
-                    colorIndex++;
-                });
-            };
-
-            const renderDailyBreakdown = (dailyGroups) => {
-                const container = document.getElementById('daily-breakdown');
-                container.innerHTML = '';
-                
-                const sortedDays = Object.keys(dailyGroups).sort((a, b) => dailyGroups[b][0].startTime - dailyGroups[a][0].startTime);
-
-                if (sortedDays.length === 0) {
-                    container.innerHTML = '<div class="text-muted-color text-sm">داده‌ای برای نمایش وجود ندارد.</div>';
-                    return;
-                }
-
-                sortedDays.forEach(day => {
-                    const sessions = dailyGroups[day];
-                    let dayMs = 0;
-                    let tasksHtml = '';
-                    
-                    sessions.forEach(s => {
-                        const end = s.endTime || Date.now();
-                        dayMs += (end - s.startTime);
-                        tasksHtml += `
-                            <div class="py-2 border-b border-border-main/30 text-xs sm:text-sm flex justify-between gap-4">
-                                <span class="text-soft-color flex-1 whitespace-pre-wrap break-words">${s.task || 'بدون توضیحات'}</span>
-                                <span class="text-muted-color whitespace-nowrap mt-1">${formatTime(s.startTime)} تا ${s.endTime ? formatTime(s.endTime) : 'الان'}</span>
-                            </div>
-                        `;
-                    });
-                    
-                    const dayHtml = `
-                        <div class="bg-bg-soft/30 border border-border-main rounded-xl p-4">
-                            <div class="flex justify-between mb-2">
-                                <h4 class="text-sm sm:text-base font-bold text-emerald-glow">${day}</h4>
-                                <span class="text-xs text-soft-color">مدت زمان: ${toFa(formatDuration(dayMs))}</span>
-                            </div>
-                            <div>${tasksHtml}</div>
-                        </div>
-                    `;
-                    container.innerHTML += dayHtml;
-                });
-            };
-
-            // --- Export/Import Logic ---
-            document.getElementById('export-csv').addEventListener('click', () => {
-                let csv = '\uFEFFتاریخ,تسک,ساعت شروع,ساعت پایان,مدت زمان\n';
-                state.sessions.forEach(s => {
-                    const dur = formatDuration(s.endTime - s.startTime);
-                    const date = formatSolarDate(s.startTime);
-                    const start = formatTime(s.startTime);
-                    const end = formatTime(s.endTime);
-                    const task = `"${s.task?.replace(/"/g, '""').replace(/\n/g, ' ')}"`;
-                    csv += `${date},${task},${start},${end},${dur}\n`;
-                });
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `chronos-report-${Date.now()}.csv`;
-                link.click();
-            });
-
-            document.getElementById('export-pdf').addEventListener('click', () => window.print());
-
-            document.getElementById('export-json').addEventListener('click', () => {
-                const dataStr = JSON.stringify({ activeSession: state.activeSession, sessions: state.sessions }, null, 2);
-                const blob = new Blob([dataStr], { type: "application/json" });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `chronos-database-${Date.now()}.json`;
-                link.click();
-            });
-
-            document.getElementById('import-json-btn').addEventListener('click', () => {
-                document.getElementById('import-json-input').click();
-            });
-
-            document.getElementById('import-json-input').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const importedState = JSON.parse(event.target.result);
-                        if (importedState.sessions && importedState.activeSession !== undefined) {
-                            state.activeSession = importedState.activeSession;
-                            state.sessions = importedState.sessions;
-                            saveState();
-                            renderTracker();
-                            renderReports();
-                            alert("دیتابیس با موفقیت بازیابی شد!");
-                        } else {
-                            alert("فایل JSON نامعتبر است.");
-                        }
-                    } catch (err) {
-                        alert("خطا در خواندن فایل: " + err.message);
-                    }
-                };
-                reader.readAsText(file);
-                e.target.value = ''; 
-            });
-
-            // --- Init ---
-            loadState();
-            renderTracker();
-        });
-    </script>
+    <!-- لود اسکریپت اصلی به شکل ماژول -->
+    <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>
