@@ -42,7 +42,6 @@
         }
     </script>
 
-    <!-- لود فایل استایل ماژولار -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="h-screen flex flex-col">
@@ -188,12 +187,12 @@
                 </div>
 
                 <div class="px-3 sm:px-6 py-2.5 sm:py-3 border-b border-border-main bg-bg-soft/50 flex-shrink-0">
-                    <div class="flex items-center text-[11px] sm:text-sm text-muted-color font-medium">
-                        <div class="w-20 sm:w-28 flex-shrink-0">تاریخ</div>
-                        <div class="flex-1 px-3">تسک‌ها / توضیحات</div>
-                        <div class="w-16 sm:w-24 text-center flex-shrink-0">شروع</div>
-                        <div class="w-28 sm:w-36 text-center flex-shrink-0">پایان (مدت)</div>
-                        <div class="w-10 sm:w-12 text-left flex-shrink-0 pl-1">عملیات</div>
+                    <div class="grid grid-cols-12 gap-1 sm:gap-2 text-[11px] sm:text-sm text-muted-color font-medium items-center">
+                        <div class="col-span-3 sm:col-span-2">تاریخ</div>
+                        <div class="col-span-4 sm:col-span-6 px-1">تسک‌ها / توضیحات</div>
+                        <div class="col-span-2 sm:col-span-1 text-center">شروع</div>
+                        <div class="col-span-2 sm:col-span-2 text-center">پایان (مدت)</div>
+                        <div class="col-span-1 text-left pl-1">عملیات</div>
                     </div>
                 </div>
                 <div id="session-list" class="flex-1 overflow-y-auto min-h-0"></div>
@@ -203,7 +202,6 @@
         <!-- تب ۲: گزارش‌ها -->
         <main id="reports-view" class="hidden flex-1 flex-col min-h-0 overflow-y-auto pr-1 space-y-4 sm:space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-shrink-0">
-                <!-- کارت اطلاعات کاربر و حساب -->
                 <div class="lg:col-span-6 print-card bg-panel border border-border-main rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col justify-between relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-glow/5 to-transparent pointer-events-none"></div>
                     <div class="relative z-10 flex flex-col h-full justify-between gap-4">
@@ -238,7 +236,6 @@
                     </div>
                 </div>
 
-                <!-- ۴ کارت آماری -->
                 <div class="lg:col-span-6 grid grid-cols-2 gap-3 sm:gap-4">
                     <div class="print-card bg-panel border border-border-main rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col justify-between">
                         <p class="text-soft-color text-xs sm:text-sm font-medium">کل ساعت‌ها</p>
@@ -271,7 +268,6 @@
                 </div>
             </div>
 
-            <!-- بخش گزارش روزانه نوبت‌ها -->
             <div class="print-card bg-panel border border-border-main rounded-[20px] shadow-xl flex-shrink-0 overflow-hidden">
                 <div class="p-3 sm:p-4 flex flex-col sm:flex-row gap-2 sm:gap-4 border-b border-border-main bg-bg-soft/30 flex-shrink-0 no-print">
                     <input type="search" id="report-search-input" name="report_search_query" autocomplete="new-password" class="search-field flex-1 bg-bg-main border border-border-main rounded-xl px-4 text-main-color text-sm focus:outline-none focus:border-emerald-glow" placeholder="جستجوی در تسک‌های گزارش (حداقل ۳ حرف)...">
@@ -289,12 +285,12 @@
 
         <!-- تب ۳: کاربران و همکاران -->
         <main id="users-view" class="hidden flex-1 flex-col min-h-0 overflow-y-auto pr-1 space-y-4 sm:space-y-6">
-            <div class="flex justify-between items-center bg-panel border border-border-main rounded-2xl p-4 flex-shrink-0">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-panel border border-border-main rounded-2xl p-4 flex-shrink-0">
                 <div>
                     <h3 class="text-base sm:text-lg font-bold text-main-color">فهرست همکاران</h3>
                     <p class="text-xs text-soft-color">مشاهده گزارش همکاران مجاز و وضعیت نوبت جاری</p>
                 </div>
-                <button id="add-user-btn" class="hidden h-10 px-4 rounded-xl bg-emerald-glow text-bg-main font-bold text-xs sm:text-sm shadow-glow hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 sm:gap-2">
+                <button id="add-user-btn" class="hidden h-10 px-4 rounded-xl bg-emerald-glow text-bg-main font-bold text-xs sm:text-sm shadow-glow hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1.5 self-stretch sm:self-auto">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -303,21 +299,19 @@
             </div>
 
             <div class="bg-panel border border-border-main rounded-2xl shadow-xl overflow-hidden flex-shrink-0">
-                <div class="px-4 sm:px-6 py-3 border-b border-border-main bg-bg-soft/50 flex items-center justify-between text-xs font-semibold text-muted-color">
-                    <div class="w-36 sm:w-44">نام و نام خانوادگی</div>
-                    <div class="hidden sm:block flex-1 px-4">نام کاربری</div>
-                    <div class="w-20 text-center">وضعیت</div>
-                    <div class="w-36 sm:w-48 text-left">عملیات</div>
+                <div class="px-3 sm:px-6 py-3 border-b border-border-main bg-bg-soft/50 grid grid-cols-12 gap-1 sm:gap-2 text-[11px] sm:text-xs font-semibold text-muted-color items-center">
+                    <div class="col-span-4 sm:col-span-4">نام و نام خانوادگی</div>
+                    <div class="hidden sm:block sm:col-span-3">نام کاربری</div>
+                    <div class="col-span-3 sm:col-span-2 text-center">وضعیت</div>
+                    <div class="col-span-5 sm:col-span-3 text-left pl-1">عملیات</div>
                 </div>
                 <div id="user-table-body" class="divide-y divide-border-main/40"></div>
             </div>
         </main>
     </div>
 
-    <!-- ریشه لایه‌های مودال -->
     <div id="modal-root"></div>
 
-    <!-- لود اسکریپت اصلی به شکل ماژول -->
     <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>

@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInfoText = document.getElementById('user-info-text');
     const mobUserInfoText = document.getElementById('mob-user-info-text');
 
-    // تبدیل خودکار اعداد در ورودی‌ها
     document.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             if (['username-input', 'password-input', 'new-user-username', 'new-user-password', 'change-old-pass', 'change-new-pass', 'search-input', 'report-search-input'].includes(e.target.id)) {
@@ -260,25 +259,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createTrackerRowElement = (session, isActive) => {
         const row = document.createElement('div');
-        row.className = `session-row flex items-center px-3 sm:px-6 py-2.5 sm:py-3 border-b border-border-main/50 transition-all text-xs sm:text-sm ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
+        row.className = `session-row grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 border-b border-border-main/50 transition-all text-xs sm:text-sm items-center ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
         
-        const dateCol = `<div class="w-20 sm:w-28 text-soft-color font-medium text-[11px] sm:text-sm flex-shrink-0">${formatSolarDate(session.startTime)}</div>`;
-        const taskCol = `<div class="flex-1 px-3 text-main-color whitespace-pre-wrap break-words leading-relaxed">${toFa(session.task || 'بدون توضیحات')}</div>`;
-        const startCol = `<div class="w-16 sm:w-24 text-center text-soft-color flex-shrink-0">${formatTime(session.startTime)}</div>`;
+        const dateCol = `<div class="col-span-3 sm:col-span-2 text-soft-color font-medium text-[11px] sm:text-sm truncate">${formatSolarDate(session.startTime)}</div>`;
+        const taskCol = `<div class="col-span-4 sm:col-span-6 px-1 text-main-color whitespace-pre-wrap break-words leading-relaxed">${toFa(session.task || 'بدون توضیحات')}</div>`;
+        const startCol = `<div class="col-span-2 sm:col-span-1 text-center text-soft-color text-[11px] sm:text-sm">${formatTime(session.startTime)}</div>`;
         
         let endCol;
         if (isActive) {
-            endCol = `<div class="w-28 sm:w-36 text-center flex-shrink-0"><span class="px-2 py-0.5 sm:py-1 rounded-lg bg-emerald-glow/15 text-emerald-glow text-[10px] sm:text-xs font-bold animate-pulse">در حال اجرا</span></div>`;
+            endCol = `<div class="col-span-2 sm:col-span-2 text-center"><span class="px-1.5 py-0.5 rounded-md bg-emerald-glow/15 text-emerald-glow text-[10px] font-bold animate-pulse">اجرا</span></div>`;
         } else {
             const dur = formatDuration(session.endTime - session.startTime);
-            endCol = `<div class="w-28 sm:w-36 text-center text-soft-color flex items-center justify-center gap-1.5 whitespace-nowrap text-[11px] sm:text-sm flex-shrink-0"><span>${formatTime(session.endTime)}</span><span class="text-muted-color text-[10px] sm:text-[11px]">(${toFa(dur)})</span></div>`;
+            endCol = `<div class="col-span-2 sm:col-span-2 text-center text-soft-color text-[11px] sm:text-sm whitespace-nowrap"><span>${formatTime(session.endTime)}</span> <span class="text-muted-color text-[10px]">(${toFa(dur)})</span></div>`;
         }
-    
-        let actionCol = `<div class="w-10 sm:w-12 text-left flex-shrink-0 pl-1"></div>`;
+
+        let actionCol = `<div class="col-span-1 text-left pl-1"></div>`;
         if (!isActive) {
             actionCol = `
-                <div class="w-10 sm:w-12 text-left flex-shrink-0 pl-1 relative flex justify-end">
-                    <button class="action-menu-btn p-1.5 rounded-lg hover:bg-border-main text-soft-color hover:text-main-color" data-id="${session.id}">
+                <div class="col-span-1 text-left pl-1 relative flex justify-end">
+                    <button class="action-menu-btn p-1 rounded-lg hover:bg-border-main text-soft-color hover:text-main-color" data-id="${session.id}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
                     </button>
                     <div class="dropdown-menu absolute left-0 mt-1 w-28 bg-panel border border-border-main rounded-xl shadow-xl py-2 hidden z-30 text-right">
@@ -287,14 +286,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>`;
         }
-    
+
         row.innerHTML = `${dateCol}${taskCol}${startCol}${endCol}${actionCol}`;
-    
+
         const menuBtn = row.querySelector('.action-menu-btn');
         const dropMenu = row.querySelector('.dropdown-menu');
         const editBtn = row.querySelector('.edit-btn');
         const deleteBtn = row.querySelector('.delete-btn');
-    
+
         if (menuBtn) {
             menuBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -304,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (editBtn) editBtn.onclick = () => openEditModal(session, fetchUserData);
         if (deleteBtn) deleteBtn.onclick = () => openDeleteModal(session.id, fetchUserData);
-    
+
         return row;
     };
 
@@ -655,6 +654,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const isToday = (ts) => new Date(Number(ts)).toDateString() === new Date().toDateString();
+    const getStartOfWeek = (ts) => {
+        const d = new Date(Number(ts));
+        const day = d.getDay();
+        const diff = (day === 6) ? 0 : day + 1;
+        d.setDate(d.getDate() - diff);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+    };
+
     const getFilteredReportSessions = () => {
         let sessions = [...myReportSessions];
         const { text, from, to } = reportFilters;
@@ -838,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 allUsersList = data.users || [];
                 allPermissionsList = data.permissions || [];
-                isManager = data.is_manager;
+                isManager = Boolean(data.is_manager);
 
                 if (isManager) document.getElementById('add-user-btn').classList.remove('hidden');
                 else document.getElementById('add-user-btn').classList.add('hidden');
@@ -856,7 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         allUsersList.forEach(u => {
             const row = document.createElement('div');
-            row.className = 'px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2 text-xs sm:text-sm hover:bg-bg-soft/40 transition-colors';
+            row.className = 'px-3 sm:px-6 py-3 grid grid-cols-12 gap-1 sm:gap-2 text-xs sm:text-sm items-center hover:bg-bg-soft/40 transition-colors';
             const isSelf = Number(u.id) === currentUser.id;
 
             let statusHtml;
@@ -877,17 +886,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             row.innerHTML = `
-                <div class="w-36 sm:w-44 font-semibold text-main-color flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                    <span>${u.full_name}</span>
-                    ${u.role === 'manager' ? '<span class="text-[9px] sm:text-[10px] text-emerald-glow bg-emerald-glow/10 px-1.5 sm:px-2 py-0.5 rounded-md font-normal">مدیر</span>' : ''}
+                <div class="col-span-4 sm:col-span-4 font-semibold text-main-color flex items-center gap-1 truncate">
+                    <span class="truncate">${u.full_name}</span>
+                    ${u.role === 'manager' ? '<span class="text-[9px] text-emerald-glow bg-emerald-glow/10 px-1 py-0.5 rounded font-normal">مدیر</span>' : ''}
                 </div>
-                <div class="hidden sm:block flex-1 px-4 text-soft-color">${u.username}</div>
-                <div class="w-20 text-center flex-shrink-0">${statusHtml}</div>
-                <div class="w-36 sm:w-48 text-left flex justify-end gap-1.5 sm:gap-2 flex-shrink-0">
-                    <button class="view-user-rep-btn px-2 sm:px-3 py-1.5 rounded-lg bg-emerald-glow/15 border border-emerald-glow/30 text-emerald-glow hover:bg-emerald-glow hover:text-bg-main transition-all text-[11px] sm:text-xs font-bold" data-id="${u.id}">گزارش</button>
+                <div class="hidden sm:block sm:col-span-3 text-soft-color truncate">${u.username}</div>
+                <div class="col-span-3 sm:col-span-2 text-center">${statusHtml}</div>
+                <div class="col-span-5 sm:col-span-3 text-left flex justify-end gap-1">
+                    <button class="view-user-rep-btn px-2 py-1 rounded-lg bg-emerald-glow/15 border border-emerald-glow/30 text-emerald-glow hover:bg-emerald-glow hover:text-bg-main text-[11px] font-bold" data-id="${u.id}">گزارش</button>
                     ${isManager ? `
-                        <button class="perm-btn px-2 sm:px-3 py-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow text-[11px] sm:text-xs" data-id="${u.id}">دسترسی‌ها</button>
-                        ${!isSelf ? `<button class="del-user-btn px-2 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-[11px] sm:text-xs" data-id="${u.id}">حذف</button>` : ''}
+                        <button class="perm-btn px-1.5 py-1 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow text-[11px]" data-id="${u.id}">دسترسی</button>
+                        ${!isSelf ? `<button class="del-user-btn px-1.5 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-[11px]" data-id="${u.id}">حذف</button>` : ''}
                     ` : ''}
                 </div>
             `;
@@ -1116,12 +1125,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openPermissionsModal = (viewerId) => {
-        const targetUser = allUsersList.find(u => Number(u.id) === viewerId);
+        const targetUser = allUsersList.find(u => Number(u.id) === Number(viewerId));
         const currentPermTargets = allPermissionsList
-            .filter(p => Number(p.viewer_id) === viewerId)
+            .filter(p => Number(p.viewer_id) === Number(viewerId))
             .map(p => Number(p.target_id));
 
-        const otherUsers = allUsersList.filter(u => Number(u.id) !== viewerId);
+        const otherUsers = allUsersList.filter(u => Number(u.id) !== Number(viewerId));
 
         let checkboxesHtml = '';
         if (otherUsers.length === 0) {
@@ -1142,7 +1151,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h2 class="text-base sm:text-lg font-bold text-main-color">دسترسی گزارش‌ها</h2>
-                    <p class="text-xs text-soft-color mt-1">«${targetUser?.full_name}» می‌تواند گزارش این کاربران را مشاهده کند:</p>
+                    <p class="text-xs text-soft-color mt-1">«${targetUser ? targetUser.full_name : ''}» می‌تواند گزارش این کاربران را مشاهده کند:</p>
                 </div>
                 <button class="modal-close-x text-soft-color hover:text-main-color"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
@@ -1160,15 +1169,39 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.querySelector('.modal-cancel').onclick = closeModal;
 
             modal.querySelector('#modal-save-perms').onclick = async () => {
+                const saveBtn = modal.querySelector('#modal-save-perms');
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'در حال ذخیره...';
+
                 const checkedIds = Array.from(modal.querySelectorAll('.perm-checkbox:checked')).map(cb => Number(cb.value));
-                const res = await fetch('api.php?action=admin_save_permissions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ viewer_id: viewerId, targets: checkedIds })
-                });
-                if (res.ok) {
-                    closeModal();
-                    loadVisibleUsers();
+
+                try {
+                    const res = await fetch('api.php?action=admin_save_permissions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            viewer_id: Number(viewerId),
+                            targets: checkedIds
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok && data.status === 'success') {
+                        closeModal();
+                        await loadVisibleUsers();
+                    } else {
+                        alert(data.error || 'خطا در ذخیره دسترسی‌ها');
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = 'ذخیره دسترسی‌ها';
+                    }
+                } catch (err) {
+                    alert('خطا در برقراری ارتباط با سرور');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'ذخیره دسترسی‌ها';
                 }
             };
         });
