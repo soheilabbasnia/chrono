@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            // فقط فیلدهای متنی تبدیل شوند؛ مقدار چک‌باکس/رادیو و ... نباید تغییر کند
+            if (e.target.tagName === 'INPUT' && !['text', 'search', 'tel', ''].includes(e.target.type)) {
+                return;
+            }
             if (['username-input', 'password-input', 'new-user-username', 'new-user-password', 'change-old-pass', 'change-new-pass', 'search-input', 'report-search-input'].includes(e.target.id)) {
                 return;
             }
@@ -1173,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveBtn.disabled = true;
                 saveBtn.textContent = 'در حال ذخیره...';
 
-                const checkedIds = Array.from(modal.querySelectorAll('.perm-checkbox:checked')).map(cb => Number(cb.value));
+                const checkedIds = Array.from(modal.querySelectorAll('.perm-checkbox:checked')).map(cb => Number(toEn(cb.value))).filter(id => Number.isInteger(id) && id > 0);
 
                 try {
                     const res = await fetch('api.php?action=admin_save_permissions', {
