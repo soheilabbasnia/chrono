@@ -1,4 +1,4 @@
-import { toFa, toEn, formatSolarDate, formatTime, formatDuration, jalaaliToGregorian, isToday, getStartOfWeek } from './utils.js';
+import { toFa, toEn, escapeHtml, formatSolarDate, formatTime, formatDuration, jalaaliToGregorian, isToday, getStartOfWeek } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const THEME_KEY = 'chronos_theme';
@@ -198,9 +198,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return sessions;
     };
 
-    searchInput.addEventListener('input', (e) => {
-        state.filters.text = e.target.value.trim();
-        renderTracker();
+    // تأخیر کوتاه برای جستجو تا با هر حرف کل لیست دوباره ساخته نشود
+    let searchTimer = null;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            state.filters.text = searchInput.value.trim();
+            renderTracker();
+        }, 200);
     });
 
     clearFilterBtn.addEventListener('click', () => {
@@ -266,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         row.className = `session-row grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 border-b border-border-main/50 transition-all text-xs sm:text-sm items-center ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
         
         const dateCol = `<div class="col-span-3 sm:col-span-2 text-soft-color font-medium text-[11px] sm:text-sm truncate">${formatSolarDate(session.startTime)}</div>`;
-        const taskCol = `<div class="col-span-4 sm:col-span-6 px-1 text-main-color whitespace-pre-wrap break-words leading-relaxed">${toFa(session.task || 'بدون توضیحات')}</div>`;
+        const taskCol = `<div class="col-span-4 sm:col-span-6 px-1 text-main-color whitespace-pre-wrap break-words leading-relaxed">${escapeHtml(toFa(session.task || 'بدون توضیحات'))}</div>`;
         const startCol = `<div class="col-span-2 sm:col-span-1 text-center text-soft-color text-[11px] sm:text-sm">${formatTime(session.startTime)}</div>`;
         
         let endCol;
@@ -424,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div>
                     <label class="block text-xs text-soft-color mb-2">تسک‌ها / توضیحات</label>
-                    <textarea id="edit-task" rows="3" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color resize-none focus:outline-none focus:border-emerald-glow">${toFa(session.task || '')}</textarea>
+                    <textarea id="edit-task" rows="3" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color resize-none focus:outline-none focus:border-emerald-glow">${escapeHtml(toFa(session.task || ''))}</textarea>
                 </div>
             </div>
             <div class="flex gap-3">
@@ -508,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isForOther = targetUserId !== currentUser.id;
         const html = `
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-base sm:text-lg font-bold text-main-color">تغییر رمز عبور ${isForOther ? `«${targetUserName}»` : ''}</h2>
+                <h2 class="text-base sm:text-lg font-bold text-main-color">تغییر رمز عبور ${isForOther ? `«${escapeHtml(targetUserName)}»` : ''}</h2>
                 <button class="modal-close-x text-soft-color hover:text-main-color"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <div class="space-y-4 mb-6 text-xs sm:text-sm">
@@ -658,16 +663,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const isToday = (ts) => new Date(Number(ts)).toDateString() === new Date().toDateString();
-    const getStartOfWeek = (ts) => {
-        const d = new Date(Number(ts));
-        const day = d.getDay();
-        const diff = (day === 6) ? 0 : day + 1;
-        d.setDate(d.getDate() - diff);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime();
-    };
-
     const getFilteredReportSessions = () => {
         let sessions = [...myReportSessions];
         const { text, from, to } = reportFilters;
@@ -726,7 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = document.createElement('div');
         row.className = 'flex items-center justify-between gap-2 sm:gap-4 px-2 sm:px-6 py-2.5 sm:py-3 border-b border-border-main/30 text-xs sm:text-sm hover:bg-bg-soft/30 transition-colors';
 
-        const taskCol = `<div class="flex-1 text-main-color whitespace-pre-wrap break-words leading-relaxed">${toFa(session.task || 'بدون توضیحات')}</div>`;
+        const taskCol = `<div class="flex-1 text-main-color whitespace-pre-wrap break-words leading-relaxed">${escapeHtml(toFa(session.task || 'بدون توضیحات'))}</div>`;
         const startCol = `<div class="w-16 sm:w-24 text-soft-color text-center font-medium">${formatTime(session.startTime)}</div>`;
 
         const dur = formatDuration(Number(session.endTime) - Number(session.startTime));
@@ -777,11 +772,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportSearchInput = document.getElementById('report-search-input');
     const reportClearFilterBtn = document.getElementById('report-clear-filter-btn');
 
-    reportSearchInput.addEventListener('input', (e) => {
-        reportFilters.text = e.target.value.trim();
-        if (reportFilters.text || reportFilters.from) reportClearFilterBtn.classList.remove('hidden');
-        else reportClearFilterBtn.classList.add('hidden');
-        renderReports();
+    let reportSearchTimer = null;
+    reportSearchInput.addEventListener('input', () => {
+        clearTimeout(reportSearchTimer);
+        reportSearchTimer = setTimeout(() => {
+            reportFilters.text = reportSearchInput.value.trim();
+            if (reportFilters.text || reportFilters.from) reportClearFilterBtn.classList.remove('hidden');
+            else reportClearFilterBtn.classList.add('hidden');
+            renderReports();
+        }, 200);
     });
 
     reportClearFilterBtn.addEventListener('click', () => {
@@ -875,7 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let statusHtml;
             if (u.active_task) {
                 const activeStart = formatTime(u.active_startTime);
-                const hoverText = `در حال کار روی: ${u.active_task} (شروع: ${activeStart})`;
+                const hoverText = `در حال کار روی: ${escapeHtml(u.active_task)} (شروع: ${activeStart})`;
                 statusHtml = `
                     <div class="relative group inline-flex items-center gap-1.5 cursor-pointer">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-glow animate-pulse"></span>
@@ -891,10 +890,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             row.innerHTML = `
                 <div class="col-span-4 sm:col-span-4 font-semibold text-main-color flex items-center gap-1 truncate">
-                    <span class="truncate">${u.full_name}</span>
+                    <span class="truncate">${escapeHtml(u.full_name)}</span>
                     ${u.role === 'manager' ? '<span class="text-[9px] text-emerald-glow bg-emerald-glow/10 px-1 py-0.5 rounded font-normal">مدیر</span>' : ''}
                 </div>
-                <div class="hidden sm:block sm:col-span-3 text-soft-color truncate">${u.username}</div>
+                <div class="hidden sm:block sm:col-span-3 text-soft-color truncate">${escapeHtml(u.username)}</div>
                 <div class="col-span-3 sm:col-span-2 text-center">${statusHtml}</div>
                 <div class="col-span-5 sm:col-span-3 text-left flex justify-end gap-1">
                     <button class="view-user-rep-btn px-2 py-1 rounded-lg bg-emerald-glow/15 border border-emerald-glow/30 text-emerald-glow hover:bg-emerald-glow hover:text-bg-main text-[11px] font-bold" data-id="${u.id}">گزارش</button>
@@ -964,8 +963,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const html = `
                 <div class="flex justify-between items-center mb-6 border-b border-border-main/40 pb-4">
                     <div>
-                        <h2 class="text-base sm:text-xl font-bold text-main-color">گزارش کامل فعالیت: ${targetUser.full_name}</h2>
-                        <p class="text-xs text-soft-color mt-1">${targetUser.username} (${targetUser.role === 'manager' ? 'مدیر' : 'همکار'})</p>
+                        <h2 class="text-base sm:text-xl font-bold text-main-color">گزارش کامل فعالیت: ${escapeHtml(targetUser.full_name)}</h2>
+                        <p class="text-xs text-soft-color mt-1">${escapeHtml(targetUser.username)} (${targetUser.role === 'manager' ? 'مدیر' : 'همکار'})</p>
                     </div>
                     <button class="modal-close-x text-soft-color hover:text-main-color"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
@@ -1105,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </div>
                 <h2 class="text-base sm:text-lg font-bold text-main-color mb-2">حذف کاربر</h2>
-                <p class="text-soft-color mb-6 text-xs sm:text-sm">آیا از حذف «${targetUser?.full_name || ''}» اطمینان دارید؟</p>
+                <p class="text-soft-color mb-6 text-xs sm:text-sm">آیا از حذف «${escapeHtml(targetUser?.full_name || '')}» اطمینان دارید؟</p>
                 <div class="flex gap-3">
                     <button id="modal-confirm-del-user" class="h-11 flex-1 rounded-xl bg-red-500 text-white font-bold transition-all hover:opacity-90 active:scale-95 text-xs sm:text-sm flex items-center justify-center">بله، حذف شود</button>
                     <button class="modal-cancel h-11 flex-1 rounded-xl bg-bg-soft border border-border-main text-soft-color font-medium transition-all hover:bg-border-main active:scale-95 text-xs sm:text-sm flex items-center justify-center">انصراف</button>
@@ -1145,7 +1144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkboxesHtml += `
                     <label class="flex items-center gap-3 p-2.5 rounded-xl bg-bg-soft/50 hover:bg-bg-soft border border-border-main/50 cursor-pointer">
                         <input type="checkbox" class="perm-checkbox w-4 h-4 rounded text-emerald-glow focus:ring-0" value="${u.id}" ${isChecked}>
-                        <span class="text-xs sm:text-sm text-main-color font-medium">${u.full_name} (${u.username})</span>
+                        <span class="text-xs sm:text-sm text-main-color font-medium">${escapeHtml(u.full_name)} (${escapeHtml(u.username)})</span>
                     </label>
                 `;
             });
@@ -1155,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h2 class="text-base sm:text-lg font-bold text-main-color">دسترسی گزارش‌ها</h2>
-                    <p class="text-xs text-soft-color mt-1">«${targetUser ? targetUser.full_name : ''}» می‌تواند گزارش این کاربران را مشاهده کند:</p>
+                    <p class="text-xs text-soft-color mt-1">«${escapeHtml(targetUser ? targetUser.full_name : '')}» می‌تواند گزارش این کاربران را مشاهده کند:</p>
                 </div>
                 <button class="modal-close-x text-soft-color hover:text-main-color"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>

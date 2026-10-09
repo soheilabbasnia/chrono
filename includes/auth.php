@@ -2,18 +2,22 @@
 declare(strict_types=1);
 
 function handleLogin(PDO $db, array $input): void {
-    $username = trim($input['username'] ?? '');
-    $password = $input['password'] ?? '';
+    $username = inputString($input, 'username');
+    $password = inputString($input, 'password', false);
 
-    if (empty($username) || empty($password)) {
+    if ($username === '' || $password === '') {
         jsonResponse(['error' => 'نام کاربری و رمز عبور الزامی است'], 400);
     }
 
-    $stmt = $db->prepare("SELECT * FROM users WHERE username = :u");
+    $stmt = $db->prepare("SELECT id, username, password_hash, full_name, role, created_at FROM users WHERE username = :u");
     $stmt->execute([':u' => $username]);
     $user = $stmt->fetch();
 
-    if (!$user || !password_verify($password, $user['password_hash'])) {
+    // حتی اگر کاربر وجود نداشته باشد یک عملیات bcrypt انجام می‌شود تا زمان پاسخ، وجود/نبود نام کاربری را لو ندهد
+    $hashToCheck = $user ? $user['password_hash'] : password_hash('dummy-password', PASSWORD_BCRYPT);
+    $passwordOk = password_verify($password, $hashToCheck);
+
+    if (!$user || !$passwordOk) {
         logDebug("تلاش ناموفق برای ورود به سیستم", ['username' => $username]);
         jsonResponse(['error' => 'نام کاربری یا رمز عبور اشتباه است'], 401);
     }

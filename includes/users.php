@@ -31,17 +31,20 @@ function handleGetVisibleUsers(PDO $db, int $currentUserId, string $currentUserR
 
 function handleChangePassword(PDO $db, int $currentUserId, string $currentUserRole, array $input): void {
     $targetId = (int)($input['user_id'] ?? $currentUserId);
-    $oldPass = $input['old_password'] ?? '';
-    $newPass = $input['new_password'] ?? '';
+    $oldPass = inputString($input, 'old_password', false);
+    $newPass = inputString($input, 'new_password', false);
 
-    if (empty($newPass)) jsonResponse(['error' => 'رمز عبور جدید الزامی است'], 400);
+    if ($newPass === '') jsonResponse(['error' => 'رمز عبور جدید الزامی است'], 400);
     if ($targetId !== $currentUserId && $currentUserRole !== 'manager') jsonResponse(['error' => 'دسترسی غیرمجاز'], 403);
 
-    if ($targetId === $currentUserId && $currentUserRole !== 'manager') {
-        $stmtCheck = $db->prepare("SELECT password_hash FROM users WHERE id = :id");
-        $stmtCheck->execute([':id' => $currentUserId]);
-        $currHash = $stmtCheck->fetchColumn();
-        if (!$currHash || !password_verify($oldPass, $currHash)) {
+    $stmtCheck = $db->prepare("SELECT password_hash FROM users WHERE id = :id");
+    $stmtCheck->execute([':id' => $targetId]);
+    $currHash = $stmtCheck->fetchColumn();
+    if ($currHash === false) jsonResponse(['error' => 'کاربر یافت نشد'], 404);
+
+    // تغییر رمز خود شخص (حتی مدیر) نیازمند رمز فعلی است؛ مدیر برای دیگران بدون رمز فعلی می‌تواند تغییر دهد
+    if ($targetId === $currentUserId) {
+        if ($oldPass === '' || !password_verify($oldPass, (string)$currHash)) {
             jsonResponse(['error' => 'رمز عبور فعلی نادرست است'], 400);
         }
     }
@@ -53,19 +56,32 @@ function handleChangePassword(PDO $db, int $currentUserId, string $currentUserRo
 }
 
 function handleCreateUser(PDO $db, array $input): void {
-    $username = trim($input['username'] ?? '');
-    $password = $input['password'] ?? '';
-    $fullName = trim($input['full_name'] ?? '');
+    $username = inputString($input, 'username');
+    $password = inputString($input, 'password', false);
+    $fullName = inputString($input, 'full_name');
     $role = ($input['role'] ?? 'partner') === 'manager' ? 'manager' : 'partner';
 
-    if (empty($username) || empty($password) || empty($fullName)) jsonResponse(['error' => 'تمام فیلدها الزامی هستند'], 400);
+    if ($username === '' || $password === '' || $fullName === '') jsonResponse(['error' => 'تمام فیلدها الزامی هستند'], 400);
+
+    $tooLong = function_exists('mb_strlen')
+        ? (mb_strlen($username) > 191 || mb_strlen($fullName) > 191)
+        : (strlen($username) > 191 || strlen($fullName) > 191);
+    if ($tooLong) jsonResponse(['error' => 'نام یا نام کاربری بیش از حد طولانی است'], 400);
 
     $stmtExists = $db->prepare("SELECT 1 FROM users WHERE username = :u");
     $stmtExists->execute([':u' => $username]);
     if ($stmtExists->fetch()) jsonResponse(['error' => 'این نام کاربری قبلاً ثبت شده است'], 400);
 
-    $stmt = $db->prepare("INSERT INTO users (username, password_hash, full_name, role, created_at) VALUES (:u, :p, :f, :r, :c)");
-    $stmt->execute([':u' => $username, ':p' => password_hash($password, PASSWORD_BCRYPT), ':f' => $fullName, ':r' => $role, ':c' => time()]);
+    try {
+        $stmt = $db->prepare("INSERT INTO users (username, password_hash, full_name, role, created_at) VALUES (:u, :p, :f, :r, :c)");
+        $stmt->execute([':u' => $username, ':p' => password_hash($password, PASSWORD_BCRYPT), ':f' => $fullName, ':r' => $role, ':c' => time()]);
+    } catch (PDOException $e) {
+        // برخورد هم‌زمان دو درخواست با یک نام کاربری (کلید یکتا)
+        if ($e->getCode() === '23000') {
+            jsonResponse(['error' => 'این نام کاربری قبلاً ثبت شده است'], 400);
+        }
+        throw $e;
+    }
 
     jsonResponse(['status' => 'success']);
 }
@@ -76,6 +92,7 @@ function handleDeleteUser(PDO $db, int $currentUserId, array $input): void {
 
     $stmt = $db->prepare("DELETE FROM users WHERE id = :id");
     $stmt->execute([':id' => $targetId]);
+    if ($stmt->rowCount() === 0) jsonResponse(['error' => 'کاربر یافت نشد'], 404);
 
     jsonResponse(['status' => 'success']);
 }
@@ -89,33 +106,39 @@ function handleSavePermissions(PDO $db, array $input): void {
         logDebug("خطا: شناسه کاربر برای ذخیره دسترسی نامعتبر است", ['input' => $input]);
         jsonResponse(['error' => 'شناسه کاربر نامعتبر است'], 400);
     }
+    if (!is_array($targets)) $targets = [];
+
+    // فقط شناسه‌های صحیح و موجود، بدون تکرار و بدون خودِ کاربر
+    $validIds = array_map('intval', $db->query("SELECT id FROM users")->fetchAll(PDO::FETCH_COLUMN));
+    if (!in_array($viewerId, $validIds, true)) {
+        jsonResponse(['error' => 'کاربر یافت نشد'], 404);
+    }
+    $cleanTargets = [];
+    foreach ($targets as $tid) {
+        $targetId = is_scalar($tid) ? (int)$tid : 0;
+        if ($targetId > 0 && $targetId !== $viewerId && in_array($targetId, $validIds, true)) {
+            $cleanTargets[$targetId] = $targetId;
+        }
+    }
 
     try {
-        // ۱. حذف تمام دسترسی‌های قبلی این کاربر
-        $stmtDel = $db->prepare("DELETE FROM report_permissions WHERE viewer_id = :vid");
-        $stmtDel->execute([':vid' => $viewerId]);
+        // حذف دسترسی‌های قبلی و درج دسترسی‌های جدید در یک تراکنش؛ اگر چیزی خطا بدهد دسترسی‌های قبلی از بین نمی‌روند
+        runInTransaction($db, function () use ($db, $viewerId, $cleanTargets) {
+            $db->prepare("DELETE FROM report_permissions WHERE viewer_id = :vid")->execute([':vid' => $viewerId]);
 
-        // ۲. درج دسترسی‌های جدید انتخاب‌شده
-        if (!empty($targets) && is_array($targets)) {
-            $stmtIns = $db->prepare("INSERT INTO report_permissions (viewer_id, target_id) VALUES (:vid, :tid)");
-            foreach ($targets as $tid) {
-                $targetId = (int)$tid;
-                // جلوگیری از ثبت دسترسی کاربر برای خودش یا شناسه‌های نامعتبر
-                if ($targetId > 0 && $targetId !== $viewerId) {
-                    $stmtIns->execute([
-                        ':vid' => $viewerId,
-                        ':tid' => $targetId
-                    ]);
+            if (!empty($cleanTargets)) {
+                $stmtIns = $db->prepare("INSERT INTO report_permissions (viewer_id, target_id) VALUES (:vid, :tid)");
+                foreach ($cleanTargets as $targetId) {
+                    $stmtIns->execute([':vid' => $viewerId, ':tid' => $targetId]);
                 }
             }
-        }
-
-        logUserActivity($viewerId, 'SAVE_PERMISSIONS', 'دسترسی‌های گزارش با موفقیت به‌روزرسانی شد');
-        jsonResponse(['status' => 'success']);
+        });
     } catch (Exception $e) {
         logDebug("خطای دیتابیس در ذخیره دسترسی‌ها: " . $e->getMessage(), ['viewer_id' => $viewerId]);
-        jsonResponse(['error' => 'خطا در ثبت پایگاه داده: ' . $e->getMessage()], 500);
+        jsonResponse(['error' => 'خطا در ثبت پایگاه داده'], 500);
     }
+
+    jsonResponse(['status' => 'success']);
 }
 
 function handleExportUserJson(PDO $db, array $input): void {
@@ -136,20 +159,46 @@ function handleImportUserJson(PDO $db, array $input): void {
     $targetId = (int)($input['user_id'] ?? 0);
     $sessions = $input['sessions'] ?? [];
 
-    if (!$targetId || !is_array($sessions)) jsonResponse(['error' => 'داده‌های فایل نامعتبر است'], 400);
+    if ($targetId <= 0 || !is_array($sessions)) jsonResponse(['error' => 'داده‌های فایل نامعتبر است'], 400);
 
-    $db->prepare("DELETE FROM sessions WHERE user_id = :uid")->execute([':uid' => $targetId]);
-    $stmtIns = $db->prepare("INSERT INTO sessions (id, user_id, startTime, endTime, task, is_active) VALUES (:id, :uid, :startTime, :endTime, :task, :is_active)");
+    $stmtUser = $db->prepare("SELECT 1 FROM users WHERE id = :id");
+    $stmtUser->execute([':id' => $targetId]);
+    if (!$stmtUser->fetchColumn()) jsonResponse(['error' => 'کاربر یافت نشد'], 404);
+
+    // اعتبارسنجی کامل فایل پیش از هر تغییر؛ اگر ردیفی خراب باشد هیچ داده‌ای حذف نمی‌شود
+    $rows = [];
     foreach ($sessions as $s) {
-        $stmtIns->execute([
-            ':id' => (int)$s['id'],
+        $id = is_array($s) ? (int)($s['id'] ?? 0) : 0;
+        $startTime = is_array($s) ? (int)($s['startTime'] ?? 0) : 0;
+        if ($id <= 0 || $startTime <= 0) {
+            jsonResponse(['error' => 'فایل پشتیبان شامل ردیف نامعتبر است'], 400);
+        }
+        $rows[] = [
+            ':id' => $id,
             ':uid' => $targetId,
-            ':startTime' => (int)$s['startTime'],
+            ':startTime' => $startTime,
             ':endTime' => !empty($s['endTime']) ? (int)$s['endTime'] : null,
-            ':task' => $s['task'] ?? '',
-            ':is_active' => (int)($s['is_active'] ?? 0)
-        ]);
+            ':task' => cleanTask(is_string($s['task'] ?? null) ? $s['task'] : ''),
+            ':is_active' => (int)($s['is_active'] ?? 0) ? 1 : 0,
+        ];
     }
 
-    jsonResponse(['status' => 'success']);
+    try {
+        // حذف نوبت‌های قبلی و درج نوبت‌های فایل در یک تراکنش (قبلاً خطا در میانه کار باعث از دست رفتن داده‌ها می‌شد)
+        runInTransaction($db, function () use ($db, $targetId, $rows) {
+            $db->prepare("DELETE FROM sessions WHERE user_id = :uid")->execute([':uid' => $targetId]);
+            $stmtIns = $db->prepare("INSERT INTO sessions (id, user_id, startTime, endTime, task, is_active) VALUES (:id, :uid, :startTime, :endTime, :task, :is_active)");
+            foreach ($rows as $row) {
+                $stmtIns->execute($row);
+            }
+        });
+    } catch (PDOException $e) {
+        logDebug("خطا در بازیابی بکاپ: " . $e->getMessage(), ['user_id' => $targetId]);
+        if ($e->getCode() === '23000') {
+            jsonResponse(['error' => 'بازیابی انجام نشد: شناسهٔ برخی نوبت‌ها با داده‌های دیگر تداخل دارد. داده‌های قبلی دست‌نخورده ماند'], 409);
+        }
+        jsonResponse(['error' => 'خطا در بازیابی داده‌ها'], 500);
+    }
+
+    jsonResponse(['status' => 'success', 'imported' => count($rows)]);
 }

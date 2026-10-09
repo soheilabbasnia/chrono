@@ -8,6 +8,17 @@ export const toEn = (str) => {
     return str.toString().replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 };
 
+// خنثی‌سازی کاراکترهای HTML در داده‌های وارد‌شده توسط کاربر پیش از قرار دادن در innerHTML (جلوگیری از XSS)
+export const escapeHtml = (str) => {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
 export const formatSolarDate = (ts) => {
     try {
         return toFa(new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ts)).replace(/-/g, '/'));

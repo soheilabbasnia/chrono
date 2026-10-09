@@ -14,22 +14,38 @@ function handleGetSessions(PDO $db, int $userId): void {
 }
 
 function handleStartSession(PDO $db, int $userId, array $input): void {
-    $task = trim($input['task'] ?? '');
-    $id = (int)($input['id'] ?? (microtime(true) * 1000));
-    $startTime = (int)($input['startTime'] ?? (microtime(true) * 1000));
+    $task = cleanTask(inputString($input, 'task'));
+    $nowMs = (int)(microtime(true) * 1000);
+    $id = (int)($input['id'] ?? $nowMs);
+    $startTime = (int)($input['startTime'] ?? $nowMs);
+    if ($id <= 0) $id = $nowMs;
+    if ($startTime <= 0) $startTime = $nowMs;
 
-    $db->prepare("DELETE FROM sessions WHERE user_id = :uid AND is_active = 1")->execute([':uid' => $userId]);
+    // حذف نوبت فعال قبلی و درج نوبت جدید در یک تراکنش؛ اگر شناسه با نوبت کاربر دیگری برخورد کند کمی جابه‌جا می‌شود
+    runInTransaction($db, function () use ($db, $userId, &$id, $startTime, $task) {
+        $db->prepare("DELETE FROM sessions WHERE user_id = :uid AND is_active = 1")->execute([':uid' => $userId]);
 
-    $stmt = $db->prepare("INSERT INTO sessions (id, user_id, startTime, endTime, task, is_active) VALUES (:id, :uid, :startTime, NULL, :task, 1)");
-    $stmt->execute([':id' => $id, ':uid' => $userId, ':startTime' => $startTime, ':task' => $task]);
+        $stmtExists = $db->prepare("SELECT 1 FROM sessions WHERE id = :id");
+        for ($i = 0; $i < 5; $i++) {
+            $stmtExists->execute([':id' => $id]);
+            if (!$stmtExists->fetchColumn()) break;
+            $id += random_int(1, 999);
+        }
+
+        $stmt = $db->prepare("INSERT INTO sessions (id, user_id, startTime, endTime, task, is_active) VALUES (:id, :uid, :startTime, NULL, :task, 1)");
+        $stmt->execute([':id' => $id, ':uid' => $userId, ':startTime' => $startTime, ':task' => $task]);
+    });
 
     jsonResponse(['status' => 'success', 'session' => ['id' => $id, 'startTime' => $startTime, 'task' => $task]]);
 }
 
 function handleStopSession(PDO $db, int $userId, array $input): void {
     $endTime = (int)($input['endTime'] ?? (microtime(true) * 1000));
-    $stmt = $db->prepare("UPDATE sessions SET endTime = :endTime, is_active = 0 WHERE user_id = :uid AND is_active = 1");
-    $stmt->execute([':endTime' => $endTime, ':uid' => $userId]);
+    // GREATEST: اگر ساعت دستگاه کاربر عقب‌تر از شروع بود، مدت منفی ثبت نشود
+    $stmt = $db->prepare("UPDATE sessions SET endTime = GREATEST(:endTime, startTime), is_active = 0 WHERE user_id = :uid AND is_active = 1");
+    $stmt->bindValue(':endTime', $endTime, PDO::PARAM_INT);
+    $stmt->bindValue(':uid', $userId, PDO::PARAM_INT);
+    $stmt->execute();
 
     jsonResponse(['status' => 'success']);
 }
@@ -38,13 +54,17 @@ function handleUpdateSession(PDO $db, int $userId, string $role, array $input): 
     $id = (int)($input['id'] ?? 0);
     $startTime = (int)($input['startTime'] ?? 0);
     $endTime = (int)($input['endTime'] ?? 0);
-    $task = trim($input['task'] ?? '');
+    $task = cleanTask(inputString($input, 'task'));
+
+    if ($id <= 0 || $startTime <= 0 || $endTime <= $startTime) {
+        jsonResponse(['error' => 'اطلاعات نوبت نامعتبر است (زمان پایان باید بعد از شروع باشد)'], 400);
+    }
 
     if ($role === 'manager') {
-        $stmt = $db->prepare("UPDATE sessions SET startTime = :startTime, endTime = :endTime, task = :task WHERE id = :id");
+        $stmt = $db->prepare("UPDATE sessions SET startTime = :startTime, endTime = :endTime, task = :task WHERE id = :id AND is_active = 0");
         $stmt->execute([':id' => $id, ':startTime' => $startTime, ':endTime' => $endTime, ':task' => $task]);
     } else {
-        $stmt = $db->prepare("UPDATE sessions SET startTime = :startTime, endTime = :endTime, task = :task WHERE id = :id AND user_id = :uid");
+        $stmt = $db->prepare("UPDATE sessions SET startTime = :startTime, endTime = :endTime, task = :task WHERE id = :id AND user_id = :uid AND is_active = 0");
         $stmt->execute([':id' => $id, ':startTime' => $startTime, ':endTime' => $endTime, ':task' => $task, ':uid' => $userId]);
     }
 
@@ -81,6 +101,9 @@ function handleGetUserReport(PDO $db, int $currentUserId, string $currentUserRol
     $stmtUser = $db->prepare("SELECT id, full_name, username, role, created_at FROM users WHERE id = :id");
     $stmtUser->execute([':id' => $targetId]);
     $targetUser = $stmtUser->fetch();
+    if (!$targetUser) {
+        jsonResponse(['error' => 'کاربر یافت نشد'], 404);
+    }
 
     $stmt = $db->prepare("SELECT id, startTime, endTime, task FROM sessions WHERE user_id = :uid AND is_active = 0 ORDER BY startTime ASC");
     $stmt->execute([':uid' => $targetId]);

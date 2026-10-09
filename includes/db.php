@@ -14,12 +14,49 @@ function getDbConnection(): PDO {
         ];
         try {
             $db = new PDO($dsn, DB_USER, DB_PASS, $options);
-            initDatabaseTables($db);
+            // ساخت جدول‌ها فقط وقتی لازم است (نصب اولیه یا نبود جدول/کاربر)، نه در هر درخواست
+            if (!isDatabaseReady($db)) {
+                initDatabaseTables($db);
+            }
         } catch (PDOException $e) {
+            $db = null;
+            if (function_exists('logDebug')) {
+                logDebug('خطا در اتصال/آماده‌سازی دیتابیس: ' . $e->getMessage());
+            }
             jsonResponse(['error' => 'خطا در ارتباط با دیتابیس'], 500);
         }
     }
     return $db;
+}
+
+// یک کوئری سبک: اگر یکی از جدول‌ها نباشد خطا می‌دهد و اگر جدول کاربران خالی باشد false برمی‌گرداند
+function isDatabaseReady(PDO $db): bool {
+    try {
+        $row = $db->query("
+            SELECT EXISTS(SELECT 1 FROM users) AS has_users,
+                   (SELECT COUNT(*) FROM report_permissions WHERE 1 = 0) AS perm_ok,
+                   (SELECT COUNT(*) FROM sessions WHERE 1 = 0) AS sess_ok
+        ")->fetch();
+        return $row && (int)$row['has_users'] === 1;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+// اجرای چند عملیات به‌صورت یک تراکنش؛ در صورت خطا همه برگردانده می‌شوند و خطا دوباره پرتاب می‌شود
+// نکته: داخل $fn نباید jsonResponse صدا زده شود (exit تراکنش را رها می‌کند)
+function runInTransaction(PDO $db, callable $fn) {
+    $db->beginTransaction();
+    try {
+        $result = $fn();
+        $db->commit();
+        return $result;
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        throw $e;
+    }
 }
 
 function initDatabaseTables(PDO $db): void {
