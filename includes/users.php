@@ -42,7 +42,6 @@ function handleChangePassword(PDO $db, int $currentUserId, string $currentUserRo
     $currHash = $stmtCheck->fetchColumn();
     if ($currHash === false) jsonResponse(['error' => 'کاربر یافت نشد'], 404);
 
-    // تغییر رمز خود شخص (حتی مدیر) نیازمند رمز فعلی است؛ مدیر برای دیگران بدون رمز فعلی می‌تواند تغییر دهد
     if ($targetId === $currentUserId) {
         if ($oldPass === '' || !password_verify($oldPass, (string)$currHash)) {
             jsonResponse(['error' => 'رمز عبور فعلی نادرست است'], 400);
@@ -76,7 +75,6 @@ function handleCreateUser(PDO $db, array $input): void {
         $stmt = $db->prepare("INSERT INTO users (username, password_hash, full_name, role, created_at) VALUES (:u, :p, :f, :r, :c)");
         $stmt->execute([':u' => $username, ':p' => password_hash($password, PASSWORD_BCRYPT), ':f' => $fullName, ':r' => $role, ':c' => time()]);
     } catch (PDOException $e) {
-        // برخورد هم‌زمان دو درخواست با یک نام کاربری (کلید یکتا)
         if ($e->getCode() === '23000') {
             jsonResponse(['error' => 'این نام کاربری قبلاً ثبت شده است'], 400);
         }
@@ -98,7 +96,6 @@ function handleDeleteUser(PDO $db, int $currentUserId, array $input): void {
 }
 
 function handleSavePermissions(PDO $db, array $input): void {
-    // خواندن شناسه کاربر هم از ورودی JSON و هم از کوئری‌پارامتر
     $viewerId = (int)($input['viewer_id'] ?? ($_GET['viewer_id'] ?? 0));
     $targets = $input['targets'] ?? [];
 
@@ -108,7 +105,6 @@ function handleSavePermissions(PDO $db, array $input): void {
     }
     if (!is_array($targets)) $targets = [];
 
-    // فقط شناسه‌های صحیح و موجود، بدون تکرار و بدون خودِ کاربر
     $validIds = array_map('intval', $db->query("SELECT id FROM users")->fetchAll(PDO::FETCH_COLUMN));
     if (!in_array($viewerId, $validIds, true)) {
         jsonResponse(['error' => 'کاربر یافت نشد'], 404);
@@ -122,7 +118,6 @@ function handleSavePermissions(PDO $db, array $input): void {
     }
 
     try {
-        // حذف دسترسی‌های قبلی و درج دسترسی‌های جدید در یک تراکنش؛ اگر چیزی خطا بدهد دسترسی‌های قبلی از بین نمی‌روند
         runInTransaction($db, function () use ($db, $viewerId, $cleanTargets) {
             $db->prepare("DELETE FROM report_permissions WHERE viewer_id = :vid")->execute([':vid' => $viewerId]);
 
@@ -165,7 +160,6 @@ function handleImportUserJson(PDO $db, array $input): void {
     $stmtUser->execute([':id' => $targetId]);
     if (!$stmtUser->fetchColumn()) jsonResponse(['error' => 'کاربر یافت نشد'], 404);
 
-    // اعتبارسنجی کامل فایل پیش از هر تغییر؛ اگر ردیفی خراب باشد هیچ داده‌ای حذف نمی‌شود
     $rows = [];
     foreach ($sessions as $s) {
         $id = is_array($s) ? (int)($s['id'] ?? 0) : 0;
@@ -184,7 +178,6 @@ function handleImportUserJson(PDO $db, array $input): void {
     }
 
     try {
-        // حذف نوبت‌های قبلی و درج نوبت‌های فایل در یک تراکنش (قبلاً خطا در میانه کار باعث از دست رفتن داده‌ها می‌شد)
         runInTransaction($db, function () use ($db, $targetId, $rows) {
             $db->prepare("DELETE FROM sessions WHERE user_id = :uid")->execute([':uid' => $targetId]);
             $stmtIns = $db->prepare("INSERT INTO sessions (id, user_id, startTime, endTime, task, is_active) VALUES (:id, :uid, :startTime, :endTime, :task, :is_active)");

@@ -14,7 +14,6 @@ function getDbConnection(): PDO {
         ];
         try {
             $db = new PDO($dsn, DB_USER, DB_PASS, $options);
-            // ساخت جدول‌ها فقط وقتی لازم است (نصب اولیه یا نبود جدول/کاربر)، نه در هر درخواست
             if (!isDatabaseReady($db)) {
                 initDatabaseTables($db);
             }
@@ -29,7 +28,6 @@ function getDbConnection(): PDO {
     return $db;
 }
 
-// یک کوئری سبک: اگر یکی از جدول‌ها نباشد خطا می‌دهد و اگر جدول کاربران خالی باشد false برمی‌گرداند
 function isDatabaseReady(PDO $db): bool {
     try {
         $row = $db->query("
@@ -43,8 +41,6 @@ function isDatabaseReady(PDO $db): bool {
     }
 }
 
-// اجرای چند عملیات به‌صورت یک تراکنش؛ در صورت خطا همه برگردانده می‌شوند و خطا دوباره پرتاب می‌شود
-// نکته: داخل $fn نباید jsonResponse صدا زده شود (exit تراکنش را رها می‌کند)
 function runInTransaction(PDO $db, callable $fn) {
     $db->beginTransaction();
     try {

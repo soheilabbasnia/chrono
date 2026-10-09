@@ -8,7 +8,6 @@ export const toEn = (str) => {
     return str.toString().replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 };
 
-// خنثی‌سازی کاراکترهای HTML در داده‌های وارد‌شده توسط کاربر پیش از قرار دادن در innerHTML (جلوگیری از XSS)
 export const escapeHtml = (str) => {
     if (str === null || str === undefined) return '';
     return String(str)

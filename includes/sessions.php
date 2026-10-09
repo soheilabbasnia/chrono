@@ -21,7 +21,6 @@ function handleStartSession(PDO $db, int $userId, array $input): void {
     if ($id <= 0) $id = $nowMs;
     if ($startTime <= 0) $startTime = $nowMs;
 
-    // حذف نوبت فعال قبلی و درج نوبت جدید در یک تراکنش؛ اگر شناسه با نوبت کاربر دیگری برخورد کند کمی جابه‌جا می‌شود
     runInTransaction($db, function () use ($db, $userId, &$id, $startTime, $task) {
         $db->prepare("DELETE FROM sessions WHERE user_id = :uid AND is_active = 1")->execute([':uid' => $userId]);
 
@@ -41,7 +40,6 @@ function handleStartSession(PDO $db, int $userId, array $input): void {
 
 function handleStopSession(PDO $db, int $userId, array $input): void {
     $endTime = (int)($input['endTime'] ?? (microtime(true) * 1000));
-    // GREATEST: اگر ساعت دستگاه کاربر عقب‌تر از شروع بود، مدت منفی ثبت نشود
     $stmt = $db->prepare("UPDATE sessions SET endTime = GREATEST(:endTime, startTime), is_active = 0 WHERE user_id = :uid AND is_active = 1");
     $stmt->bindValue(':endTime', $endTime, PDO::PARAM_INT);
     $stmt->bindValue(':uid', $userId, PDO::PARAM_INT);

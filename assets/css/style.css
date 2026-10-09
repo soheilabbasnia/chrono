@@ -50,7 +50,6 @@ input, textarea, button, select {
 .text-soft-color { color: rgb(var(--c-text-soft)); }
 .text-muted-color { color: rgb(var(--c-text-muted)); }
 
-/* تنظیم خطی و ارتفاع قطعی فیلدهای جستجو روی موبایل و دسکتاپ */
 input[type="search"], .search-field {
     -webkit-appearance: none;
     box-sizing: border-box;

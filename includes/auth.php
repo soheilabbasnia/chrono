@@ -13,7 +13,6 @@ function handleLogin(PDO $db, array $input): void {
     $stmt->execute([':u' => $username]);
     $user = $stmt->fetch();
 
-    // حتی اگر کاربر وجود نداشته باشد یک عملیات bcrypt انجام می‌شود تا زمان پاسخ، وجود/نبود نام کاربری را لو ندهد
     $hashToCheck = $user ? $user['password_hash'] : password_hash('dummy-password', PASSWORD_BCRYPT);
     $passwordOk = password_verify($password, $hashToCheck);
 

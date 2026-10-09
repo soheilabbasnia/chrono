@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            // فقط فیلدهای متنی تبدیل شوند؛ مقدار چک‌باکس/رادیو و ... نباید تغییر کند
             if (e.target.tagName === 'INPUT' && !['text', 'search', 'tel', ''].includes(e.target.type)) {
                 return;
             }
@@ -38,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // تم
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const mobThemeToggle = document.getElementById('mob-theme-toggle');
     const iconDark = document.getElementById('theme-icon-dark');
@@ -67,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggleBtn.addEventListener('click', toggleTheme);
     mobThemeToggle.addEventListener('click', toggleTheme);
 
-    // پشته مودال‌ها
     const modalRoot = document.getElementById('modal-root');
     const modalStack = [];
 
@@ -93,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape' && modalStack.length > 0) closeModal();
     });
 
-    // تب‌ها و منوی کشویی موبایل
     const tabTracker = document.getElementById('tab-tracker');
     const tabReports = document.getElementById('tab-reports');
     const tabUsers = document.getElementById('tab-users');
@@ -198,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return sessions;
     };
 
-    // تأخیر کوتاه برای جستجو تا با هر حرف کل لیست دوباره ساخته نشود
     let searchTimer = null;
     searchInput.addEventListener('input', () => {
         clearTimeout(searchTimer);

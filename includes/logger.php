@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// حداکثر حجم هر فایل لاگ؛ بعد از آن فایل به «.1» منتقل و لاگ تازه شروع می‌شود
 const LOG_MAX_BYTES = 2 * 1024 * 1024;
 
 function getLogDir(): string {
@@ -12,7 +11,6 @@ function getLogDir(): string {
     return $logDir;
 }
 
-// جلوگیری از تزریق خط جدید به لاگ (جعل ردیف) و محدود کردن طول
 function sanitizeLogText(string $text, int $maxLength = 500): string {
     $text = preg_replace('/[\r\n\t]+/', ' ', $text) ?? '';
     if (function_exists('mb_strlen') && function_exists('mb_substr')) {
@@ -28,7 +26,6 @@ function appendLog(string $file, string $line): void {
     @file_put_contents($file, $line, FILE_APPEND | LOCK_EX);
 }
 
-// ثبت لاگ خطاهای سیستمی و فنی
 function logDebug(string $message, array $context = []): void {
     $logFile = getLogDir() . '/debug.log';
     $timestamp = date('Y-m-d H:i:s');
@@ -36,7 +33,6 @@ function logDebug(string $message, array $context = []): void {
     appendLog($logFile, '[' . $timestamp . '] ' . sanitizeLogText($message, 1000) . $contextStr . "\n");
 }
 
-// ثبت لاگ رفتاری و فعالیت کاربران در فایل متنی مستقل
 function logUserActivity(int $userId, string $action, string $details = ''): void {
     $logFile = getLogDir() . '/activity.log';
     $timestamp = date('Y-m-d H:i:s');

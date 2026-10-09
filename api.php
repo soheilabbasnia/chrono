@@ -25,20 +25,17 @@ function jsonResponse(array $data, int $statusCode = 200): void {
     exit;
 }
 
-// خواندن امن یک ورودی رشته‌ای (ورودی‌های غیررشته‌ای به رشتهٔ خالی تبدیل می‌شوند)
 function inputString(array $input, string $key, bool $trim = true): string {
     $value = $input[$key] ?? '';
     if (!is_string($value)) return '';
     return $trim ? trim($value) : $value;
 }
 
-// پاک‌سازی متن تسک: حذف فاصله‌های اضافی و محدود کردن طول (ستون TEXT ظرفیت محدود دارد)
 function cleanTask(string $task): string {
     $task = trim($task);
     return function_exists('mb_substr') ? mb_substr($task, 0, 20000) : substr($task, 0, 20000);
 }
 
-// هر خطای پیش‌بینی‌نشده: ثبت در لاگ و پاسخ JSON تمیز (به‌جای خروجی خالی/HTML)
 set_exception_handler(function (Throwable $e): void {
     if (function_exists('logDebug')) {
         logDebug('خطای پیش‌بینی‌نشده: ' . $e->getMessage(), ['file' => basename($e->getFile()), 'line' => $e->getLine()]);
@@ -62,7 +59,6 @@ $input = is_array($decodedInput) ? $decodedInput : [];
 $action = $_GET['action'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
 
-// درخواست‌های بدون نیاز به احراز هویت
 if ($action === 'login' && $method === 'POST') {
     handleLogin($db, $input);
 }
@@ -73,15 +69,12 @@ if ($action === 'logout') {
     handleLogout();
 }
 
-// بررسی احراز هویت
 if (!isset($_SESSION['user_id'])) {
     jsonResponse(['error' => 'لطفاً ابتدا وارد سیستم شوید'], 401);
 }
 
 $currentUserId = (int)$_SESSION['user_id'];
 
-// نقش کاربر در هر درخواست از دیتابیس خوانده می‌شود؛ بنابراین حذف کاربر یا تغییر نقش
-// بلافاصله اعمال می‌شود (قبلاً تا پایان نشست قدیمی، دسترسی سابق باقی می‌ماند)
 $stmtAuth = $db->prepare("SELECT role FROM users WHERE id = :id");
 $stmtAuth->execute([':id' => $currentUserId]);
 $dbRole = $stmtAuth->fetchColumn();
@@ -92,10 +85,8 @@ if ($dbRole === false) {
 }
 $currentUserRole = (string)$dbRole;
 
-// آزادسازی قفل فایل نشست تا درخواست‌های هم‌زمان منتظر هم نمانند
 session_write_close();
 
-// مسیریابی اکشن‌ها
 switch ($action) {
     case 'me':
         handleGetCurrentUser($db, $currentUserId, $currentUserRole);
@@ -138,7 +129,6 @@ switch ($action) {
         handleChangePassword($db, $currentUserId, $currentUserRole, $input);
         break;
 
-    // اکشن‌های مدیر
     case 'admin_create_user':
         if ($currentUserRole !== 'manager') jsonResponse(['error' => 'دسترسی غیرمجاز'], 403);
         logUserActivity($currentUserId, 'CREATE_USER', 'ایجاد همکار جدید: ' . inputString($input, 'username'));
