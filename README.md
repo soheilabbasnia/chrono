@@ -24,10 +24,10 @@
 ### ۲. تنظیم پایگاه‌داده
 یک کپی از فایل نمونه تنظیمات ایجاد کنید:
 ```bash
-cp config.example.php config.local.php
+cp config.example.php config.php
 ```
 
-نکته: می‌توانید فایل `config.example.php` را مستقیماً به `config.local.php` تغییر نام دهید.
+نکته: می‌توانید فایل `config.example.php` را مستقیماً به `config.php` تغییر نام دهید.
 
 سپس فایل `config.local.php` را باز کرده و مشخصات پایگاه‌داده خود را وارد کنید:
 

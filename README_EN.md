@@ -24,10 +24,10 @@ Upload all project files to your web server root or subfolder (e.g., `public_htm
 ### 2. Configure Database
 Copy the template configuration file:
 ```bash
-cp config.example.php config.local.php
+cp config.example.php config.php
 ```
 
-Note: You can rename `config.example.php` to `config.local.php`
+Note: You can rename `config.example.php` to `config.php`
 
 Open `config.local.php` and set your database credentials:
 
