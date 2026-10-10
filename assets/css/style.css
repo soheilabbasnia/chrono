@@ -71,6 +71,14 @@ html.light .modal-overlay {
     min-height: 3.5rem;
 }
 
+.user-status-tooltip {
+    left: 50%;
+    right: auto;
+    max-width: calc(100vw - 2rem);
+    overflow-wrap: anywhere;
+    transform: translateX(-50%);
+}
+
 .custom-select {
     appearance: none;
     -webkit-appearance: none;
