@@ -874,7 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="relative group inline-flex items-center gap-1.5 cursor-pointer">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-glow animate-pulse"></span>
                         <span class="text-emerald-glow text-xs font-bold">آنلاین</span>
-                        <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block z-30 w-56 p-2.5 rounded-xl bg-panel border border-border-main text-xs text-soft-color shadow-2xl pointer-events-none">
+                        <div class="user-status-tooltip absolute bottom-full mb-2 hidden group-hover:block z-30 w-56 p-2.5 rounded-xl bg-panel border border-border-main text-xs text-soft-color shadow-2xl pointer-events-none">
                             ${hoverText}
                         </div>
                     </div>
