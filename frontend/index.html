@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="referrer" content="same-origin">
+    <title>کرونو (Chrono) | مدیریت زمان</title>
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300d285' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 6v6l4 2'/></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'bg-main': 'rgb(var(--c-bg-main) / <alpha-value>)',
+                        'bg-soft': 'rgb(var(--c-bg-soft) / <alpha-value>)',
+                        'panel': 'rgb(var(--c-panel) / <alpha-value>)',
+                        'border-main': 'rgb(var(--c-border) / <alpha-value>)',
+                        'emerald-glow': 'rgb(var(--c-emerald) / <alpha-value>)',
+                    },
+                    fontFamily: { 'vazir': ['Vazirmatn', 'sans-serif'] },
+                    boxShadow: {
+                        'glow': '0 0 16px rgba(0, 210, 133, 0.35)',
+                        'glow-strong': '0 0 24px rgba(0, 210, 133, 0.6)',
+                    },
+                    animation: {
+                        'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        'pulse-glow': {
+                            '0%, 100%': { boxShadow: '0 0 16px rgba(0, 210, 133, 0.35)' },
+                            '50%': { boxShadow: '0 0 24px rgba(0, 210, 133, 0.7)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-screen flex flex-col">
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
