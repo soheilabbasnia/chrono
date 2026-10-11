@@ -9,13 +9,16 @@
 bash scripts/make-deploy.sh
 ```
 
-خروجی: پوشهٔ `deploy/` و فایل `chrono-deploy.zip`. این بسته **فقط** فایل‌های
-قابل‌آپلود را دارد و عمداً این‌ها را ندارد: `config.php`، `config.local.php`،
-محتوای لاگ‌ها، پوشهٔ `data/` (مخصوص SQLite)، تست‌ها و سورس Vue.
+این اسکریپت ابتدا فرانت‌اند Vue را build می‌کند (به Node.js روی سیستم خودت نیاز
+دارد، نه روی هاست) و سپس بسته را می‌چیند. خروجی: پوشهٔ `deploy/` و فایل
+`chrono-deploy.zip`. بسته **فقط** فایل‌های قابل‌آپلود را دارد و عمداً این‌ها را
+ندارد: `config.php`، `config.local.php`، محتوای لاگ‌ها، پوشهٔ `data/`، تست‌ها و
+سورس Vue (فقط خروجی build قرار می‌گیرد).
 
-محتوای بسته: `api.php`، `index.html`، `.htaccess`، `config.example.php`،
-`includes/*.php` (شامل `security.php`)، `assets/css`، `assets/js`،
-`logs/.htaccess`.
+محتوای بسته: بک‌اند (`api.php`، `includes/*.php` شامل `security.php`، `.htaccess`،
+`config.example.php`، `logs/.htaccess`) + فرانت‌اند buildشدهٔ Vue
+(`index.html` و `assets/` با فایل‌های هش‌دار). این `index.html`/`assets` جایگزین
+نسخهٔ وانیلا می‌شوند.
 
 ## ۲) یک ستون به دیتابیس اضافه کنید (یک‌بار)
 
