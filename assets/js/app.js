@@ -127,6 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modalRoot.appendChild(overlay);
         modalStack.push(overlay);
         if (onMount) onMount(overlay);
+        const primaryIds = ['modal-confirm', 'modal-save', 'modal-delete', 'modal-save-pass', 'modal-save-user', 'modal-confirm-del-user', 'modal-save-perms', 'modal-apply-date', 'modal-apply-rep-date', 'forced-save-pass'];
+        for (const id of primaryIds) {
+            const btn = overlay.querySelector('#' + id);
+            if (btn) { btn.classList.add('modal-submit'); break; }
+        }
     };
 
     const closeModal = () => {
@@ -137,8 +142,36 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modalStack.length > 0 && !forcedModalActive) closeModal();
+        if (modalStack.length === 0) return;
+        if (e.key === 'Escape') {
+            if (!forcedModalActive) closeModal();
+            return;
+        }
+        if (e.key === 'Enter') {
+            const active = document.activeElement;
+            if (active && active.tagName === 'TEXTAREA') return;
+            const topModal = modalStack[modalStack.length - 1];
+            const submitBtn = topModal.querySelector('.modal-submit');
+            if (submitBtn && !submitBtn.disabled) {
+                e.preventDefault();
+                submitBtn.click();
+            }
+        }
     });
+
+    const setLoading = (btn, loading, loadingText = 'در حال انجام...') => {
+        if (!btn) return;
+        if (loading) {
+            if (!('originalText' in btn.dataset)) btn.dataset.originalText = btn.textContent;
+            btn.disabled = true;
+            btn.classList.add('opacity-60', 'cursor-not-allowed');
+            btn.textContent = loadingText;
+        } else {
+            btn.disabled = false;
+            btn.classList.remove('opacity-60', 'cursor-not-allowed');
+            if ('originalText' in btn.dataset) btn.textContent = btn.dataset.originalText;
+        }
+    };
 
     const tabTracker = document.getElementById('tab-tracker');
     const tabReports = document.getElementById('tab-reports');
@@ -313,23 +346,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createTrackerRowElement = (session, isActive) => {
         const row = document.createElement('div');
-        row.className = `session-row grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 border-b border-border-main/50 transition-all text-xs sm:text-sm items-center ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
-        
-        const dateCol = `<div class="col-span-3 sm:col-span-2 text-soft-color font-medium text-[11px] sm:text-sm truncate">${formatSolarDate(session.startTime)}</div>`;
-        const taskCol = `<div class="col-span-4 sm:col-span-6 px-1 text-main-color whitespace-pre-wrap break-words leading-relaxed">${escapeHtml(toFa(session.task || 'بدون توضیحات'))}</div>`;
-        const startCol = `<div class="col-span-2 sm:col-span-1 text-center text-soft-color text-[11px] sm:text-sm">${formatTime(session.startTime)}</div>`;
-        
-        let endCol;
-        if (isActive) {
-            endCol = `<div class="col-span-2 sm:col-span-2 text-center"><span class="px-1.5 py-0.5 rounded-md bg-emerald-glow/15 text-emerald-glow text-[10px] font-bold animate-pulse">اجرا</span></div>`;
-        } else {
-            const dur = formatDuration(session.endTime - session.startTime);
-            endCol = `<div class="col-span-2 sm:col-span-2 text-center text-soft-color text-[11px] sm:text-sm whitespace-nowrap"><span>${formatTime(session.endTime)}</span> <span class="text-muted-color text-[10px]">(${toFa(dur)})</span></div>`;
-        }
+        row.className = `session-row border-b border-border-main/50 transition-all ${isActive ? 'bg-emerald-glow/5' : 'hover:bg-bg-soft'}`;
 
-        let actionCol = `<div class="col-span-1 text-left pl-1"></div>`;
+        const dateStr = formatSolarDate(session.startTime);
+        const startStr = formatTime(session.startTime);
+        const taskStr = escapeHtml(toFa(session.task || 'بدون توضیحات'));
+        const durStr = isActive ? '' : toFa(formatDuration(session.endTime - session.startTime));
+        const endStr = isActive ? '' : formatTime(session.endTime);
+
+        const activeBadge = `<span class="px-1.5 py-0.5 rounded-md bg-emerald-glow/15 text-emerald-glow text-[10px] font-bold animate-pulse">اجرا</span>`;
+
+        const dateCol = `<div class="col-span-3 sm:col-span-2 text-soft-color font-medium text-[11px] sm:text-sm truncate">${dateStr}</div>`;
+        const taskCol = `<div class="col-span-4 sm:col-span-6 px-1 text-main-color whitespace-pre-wrap break-words leading-relaxed">${taskStr}</div>`;
+        const startCol = `<div class="col-span-2 sm:col-span-1 text-center text-soft-color text-[11px] sm:text-sm">${startStr}</div>`;
+        const endCol = isActive
+            ? `<div class="col-span-2 sm:col-span-2 text-center">${activeBadge}</div>`
+            : `<div class="col-span-2 sm:col-span-2 text-center text-soft-color text-[11px] sm:text-sm whitespace-nowrap"><span>${endStr}</span> <span class="text-muted-color text-[10px]">(${durStr})</span></div>`;
+
+        let desktopActions = `<div class="col-span-1 text-left pl-1"></div>`;
         if (!isActive) {
-            actionCol = `
+            desktopActions = `
                 <div class="col-span-1 text-left pl-1 relative flex justify-end">
                     <button class="action-menu-btn p-1 rounded-lg hover:bg-border-main text-soft-color hover:text-main-color" data-id="${session.id}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
@@ -341,22 +377,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
         }
 
-        row.innerHTML = `${dateCol}${taskCol}${startCol}${endCol}${actionCol}`;
+        let mobileActions = '';
+        if (!isActive) {
+            mobileActions = `
+                <div class="flex items-center gap-1 shrink-0">
+                    <button class="edit-btn p-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow" data-id="${session.id}" aria-label="ویرایش">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button class="delete-btn p-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-red-500" data-id="${session.id}" aria-label="حذف">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>`;
+        }
+
+        const mobileMeta = isActive
+            ? `<span class="text-soft-color font-medium">${dateStr}</span><span class="w-1 h-1 rounded-full bg-border-main"></span><span>شروع ${startStr}</span><span class="w-1 h-1 rounded-full bg-border-main"></span>${activeBadge}`
+            : `<span class="text-soft-color font-medium">${dateStr}</span><span class="w-1 h-1 rounded-full bg-border-main"></span><span>${startStr} – ${endStr}</span><span class="text-emerald-glow/80 font-medium">(${durStr})</span>`;
+
+        row.innerHTML = `
+            <div class="hidden sm:grid sm:grid-cols-12 sm:gap-2 sm:items-center px-3 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm">
+                ${dateCol}${taskCol}${startCol}${endCol}${desktopActions}
+            </div>
+            <div class="sm:hidden flex flex-col gap-2 px-3 py-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 text-main-color whitespace-pre-wrap break-words leading-relaxed text-sm">${taskStr}</div>
+                    ${mobileActions}
+                </div>
+                <div class="flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] text-muted-color">${mobileMeta}</div>
+            </div>
+        `;
 
         const menuBtn = row.querySelector('.action-menu-btn');
         const dropMenu = row.querySelector('.dropdown-menu');
-        const editBtn = row.querySelector('.edit-btn');
-        const deleteBtn = row.querySelector('.delete-btn');
 
-        if (menuBtn) {
+        if (menuBtn && dropMenu) {
             menuBtn.onclick = (e) => {
                 e.stopPropagation();
                 document.querySelectorAll('.dropdown-menu').forEach(m => m !== dropMenu && m.classList.add('hidden'));
                 dropMenu.classList.toggle('hidden');
             };
         }
-        if (editBtn) editBtn.onclick = () => openEditModal(session, fetchUserData);
-        if (deleteBtn) deleteBtn.onclick = () => openDeleteModal(session.id, fetchUserData);
+        row.querySelectorAll('.edit-btn').forEach(b => { b.onclick = () => openEditModal(session, fetchUserData); });
+        row.querySelectorAll('.delete-btn').forEach(b => { b.onclick = () => openDeleteModal(session.id, fetchUserData); });
 
         return row;
     };
@@ -385,8 +447,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     toggleBtn.addEventListener('click', async () => {
         if (state.activeSession) {
-            const res = await apiPost('stop_session', { endTime: Date.now() });
-            if (res.ok) fetchUserData();
+            toggleBtn.disabled = true;
+            toggleBtn.classList.add('opacity-60', 'cursor-not-allowed');
+            try {
+                const res = await apiPost('stop_session', { endTime: Date.now() });
+                if (res.ok) await fetchUserData();
+                else showToast('خطا در پایان نوبت', 'error');
+            } catch (e) {
+                showToast('خطا در برقراری ارتباط با سرور', 'error');
+            }
+            toggleBtn.disabled = false;
+            toggleBtn.classList.remove('opacity-60', 'cursor-not-allowed');
         } else {
             openTaskModal();
         }
@@ -411,11 +482,21 @@ document.addEventListener('DOMContentLoaded', () => {
             taskInput.focus();
 
             const confirmTask = async () => {
-                const now = Date.now();
-                const res = await apiPost('start_session', { id: now, startTime: now, task: toFa(taskInput.value.trim()) });
-                if (res.ok) {
-                    closeModal();
-                    fetchUserData();
+                const btn = modal.querySelector('#modal-confirm');
+                setLoading(btn, true, 'در حال ثبت...');
+                try {
+                    const now = Date.now();
+                    const res = await apiPost('start_session', { id: now, startTime: now, task: toFa(taskInput.value.trim()) });
+                    if (res.ok) {
+                        closeModal();
+                        fetchUserData();
+                    } else {
+                        showToast('خطا در شروع نوبت', 'error');
+                        setLoading(btn, false);
+                    }
+                } catch (e) {
+                    showToast('خطا در برقراری ارتباط با سرور', 'error');
+                    setLoading(btn, false);
                 }
             };
 
@@ -480,6 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.querySelector('.modal-cancel').onclick = closeModal;
 
             modal.querySelector('#modal-save').onclick = async () => {
+                const btn = modal.querySelector('#modal-save');
                 try {
                     const dateParts = toEn(modal.querySelector('#edit-date').value.trim()).split('/').map(Number);
                     const gregorianDate = jalaaliToGregorian(dateParts[0], dateParts[1], dateParts[2]);
@@ -495,6 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (newEnd <= newStart) throw new Error("زمان پایان باید بعد از شروع باشد");
 
+                    setLoading(btn, true, 'در حال ذخیره...');
                     const res = await apiPost('update_session', {
                         id: session.id,
                         startTime: newStart,
@@ -504,9 +587,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (res.ok) {
                         closeModal();
                         if (callback) callback();
+                    } else {
+                        showToast('خطا در ذخیره تغییرات', 'error');
+                        setLoading(btn, false);
                     }
                 } catch (err) {
                     showToast("خطا: " + err.message, 'error');
+                    setLoading(btn, false);
                 }
             };
         });
@@ -529,10 +616,20 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(html, (modal) => {
             modal.querySelector('.modal-cancel').onclick = closeModal;
             modal.querySelector('#modal-delete').onclick = async () => {
-                const res = await apiPost('delete_session', { id });
-                if (res.ok) {
-                    closeModal();
-                    if (callback) callback();
+                const btn = modal.querySelector('#modal-delete');
+                setLoading(btn, true, 'در حال حذف...');
+                try {
+                    const res = await apiPost('delete_session', { id });
+                    if (res.ok) {
+                        closeModal();
+                        if (callback) callback();
+                    } else {
+                        showToast('خطا در حذف نوبت', 'error');
+                        setLoading(btn, false);
+                    }
+                } catch (e) {
+                    showToast('خطا در برقراری ارتباط با سرور', 'error');
+                    setLoading(btn, false);
                 }
             };
         });
@@ -566,6 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.querySelector('.modal-cancel').onclick = closeModal;
 
             modal.querySelector('#modal-save-pass').onclick = async () => {
+                const btn = modal.querySelector('#modal-save-pass');
                 const oldPass = modal.querySelector('#change-old-pass') ? modal.querySelector('#change-old-pass').value : '';
                 const newPass = modal.querySelector('#change-new-pass').value;
 
@@ -575,13 +673,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                const res = await apiPost('change_password', { user_id: targetUserId, old_password: oldPass, new_password: newPass });
-                const data = await res.json();
-                if (res.ok) {
-                    showToast("رمز عبور با موفقیت تغییر یافت", 'success');
-                    closeModal();
-                } else {
-                    showToast(data.error || "خطا در تغییر رمز عبور", 'error');
+                setLoading(btn, true, 'در حال ذخیره...');
+                try {
+                    const res = await apiPost('change_password', { user_id: targetUserId, old_password: oldPass, new_password: newPass });
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast("رمز عبور با موفقیت تغییر یافت", 'success');
+                        closeModal();
+                    } else {
+                        showToast(data.error || "خطا در تغییر رمز عبور", 'error');
+                        setLoading(btn, false);
+                    }
+                } catch (e) {
+                    showToast('خطا در برقراری ارتباط با سرور', 'error');
+                    setLoading(btn, false);
                 }
             };
         });
@@ -1108,13 +1213,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                const res = await apiPost('admin_create_user', { full_name: fullName, username, password, role });
-                const data = await res.json();
-                if (res.ok) {
-                    closeModal();
-                    loadVisibleUsers();
-                } else {
-                    showToast(data.error || "خطا در ثبت کاربر", 'error');
+                const btn = modal.querySelector('#modal-save-user');
+                setLoading(btn, true, 'در حال ثبت...');
+                try {
+                    const res = await apiPost('admin_create_user', { full_name: fullName, username, password, role });
+                    const data = await res.json();
+                    if (res.ok) {
+                        closeModal();
+                        loadVisibleUsers();
+                    } else {
+                        showToast(data.error || "خطا در ثبت کاربر", 'error');
+                        setLoading(btn, false);
+                    }
+                } catch (e) {
+                    showToast('خطا در برقراری ارتباط با سرور', 'error');
+                    setLoading(btn, false);
                 }
             };
         });
@@ -1138,10 +1251,20 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(html, (modal) => {
             modal.querySelector('.modal-cancel').onclick = closeModal;
             modal.querySelector('#modal-confirm-del-user').onclick = async () => {
-                const res = await apiPost('admin_delete_user', { user_id: userId });
-                if (res.ok) {
-                    closeModal();
-                    loadVisibleUsers();
+                const btn = modal.querySelector('#modal-confirm-del-user');
+                setLoading(btn, true, 'در حال حذف...');
+                try {
+                    const res = await apiPost('admin_delete_user', { user_id: userId });
+                    if (res.ok) {
+                        closeModal();
+                        loadVisibleUsers();
+                    } else {
+                        showToast('خطا در حذف کاربر', 'error');
+                        setLoading(btn, false);
+                    }
+                } catch (e) {
+                    showToast('خطا در برقراری ارتباط با سرور', 'error');
+                    setLoading(btn, false);
                 }
             };
         });
@@ -1271,19 +1394,27 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         openModal(html, (modal) => {
             modal.querySelector('#forced-save-pass').onclick = async () => {
+                const btn = modal.querySelector('#forced-save-pass');
                 const oldPass = modal.querySelector('#forced-old-pass').value;
                 const newPass = modal.querySelector('#forced-new-pass').value;
                 const pwError = validatePasswordClient(newPass);
                 if (pwError) { showToast(pwError, 'error'); return; }
 
-                const res = await apiPost('change_password', { user_id: currentUser.id, old_password: oldPass, new_password: newPass });
-                const data = await res.json();
-                if (res.ok) {
-                    forcedModalActive = false;
-                    showToast("رمز عبور با موفقیت تغییر یافت", 'success');
-                    setTimeout(() => window.location.reload(), 900);
-                } else {
-                    showToast(data.error || "خطا در تغییر رمز عبور", 'error');
+                setLoading(btn, true, 'در حال ذخیره...');
+                try {
+                    const res = await apiPost('change_password', { user_id: currentUser.id, old_password: oldPass, new_password: newPass });
+                    const data = await res.json();
+                    if (res.ok) {
+                        forcedModalActive = false;
+                        showToast("رمز عبور با موفقیت تغییر یافت", 'success');
+                        setTimeout(() => window.location.reload(), 900);
+                    } else {
+                        showToast(data.error || "خطا در تغییر رمز عبور", 'error');
+                        setLoading(btn, false);
+                    }
+                } catch (e) {
+                    showToast('خطا در برقراری ارتباط با سرور', 'error');
+                    setLoading(btn, false);
                 }
             };
         });
