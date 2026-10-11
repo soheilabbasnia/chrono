@@ -37,6 +37,9 @@ function handleChangePassword(PDO $db, int $currentUserId, string $currentUserRo
     if ($newPass === '') jsonResponse(['error' => 'رمز عبور جدید الزامی است'], 400);
     if ($targetId !== $currentUserId && $currentUserRole !== 'manager') jsonResponse(['error' => 'دسترسی غیرمجاز'], 403);
 
+    $passError = validatePasswordStrength($newPass);
+    if ($passError !== null) jsonResponse(['error' => $passError], 400);
+
     $stmtCheck = $db->prepare("SELECT password_hash FROM users WHERE id = :id");
     $stmtCheck->execute([':id' => $targetId]);
     $currHash = $stmtCheck->fetchColumn();
@@ -48,8 +51,13 @@ function handleChangePassword(PDO $db, int $currentUserId, string $currentUserRo
         }
     }
 
-    $stmtUpdate = $db->prepare("UPDATE users SET password_hash = :p WHERE id = :id");
-    $stmtUpdate->execute([':p' => password_hash($newPass, PASSWORD_BCRYPT), ':id' => $targetId]);
+    $mustChangeNext = ($targetId === $currentUserId) ? 0 : 1;
+    $stmtUpdate = $db->prepare("UPDATE users SET password_hash = :p, must_change_password = :m WHERE id = :id");
+    $stmtUpdate->execute([
+        ':p' => password_hash($newPass, PASSWORD_BCRYPT),
+        ':m' => $mustChangeNext,
+        ':id' => $targetId,
+    ]);
 
     jsonResponse(['status' => 'success']);
 }
@@ -62,6 +70,9 @@ function handleCreateUser(PDO $db, array $input): void {
 
     if ($username === '' || $password === '' || $fullName === '') jsonResponse(['error' => 'تمام فیلدها الزامی هستند'], 400);
 
+    $passError = validatePasswordStrength($password);
+    if ($passError !== null) jsonResponse(['error' => $passError], 400);
+
     $tooLong = function_exists('mb_strlen')
         ? (mb_strlen($username) > 191 || mb_strlen($fullName) > 191)
         : (strlen($username) > 191 || strlen($fullName) > 191);
@@ -72,7 +83,7 @@ function handleCreateUser(PDO $db, array $input): void {
     if ($stmtExists->fetch()) jsonResponse(['error' => 'این نام کاربری قبلاً ثبت شده است'], 400);
 
     try {
-        $stmt = $db->prepare("INSERT INTO users (username, password_hash, full_name, role, created_at) VALUES (:u, :p, :f, :r, :c)");
+        $stmt = $db->prepare("INSERT INTO users (username, password_hash, full_name, role, created_at, must_change_password) VALUES (:u, :p, :f, :r, :c, 1)");
         $stmt->execute([':u' => $username, ':p' => password_hash($password, PASSWORD_BCRYPT), ':f' => $fullName, ':r' => $role, ':c' => time()]);
     } catch (PDOException $e) {
         if ($e->getCode() === '23000') {
@@ -155,6 +166,10 @@ function handleImportUserJson(PDO $db, array $input): void {
     $sessions = $input['sessions'] ?? [];
 
     if ($targetId <= 0 || !is_array($sessions)) jsonResponse(['error' => 'داده‌های فایل نامعتبر است'], 400);
+
+    if (count($sessions) > MAX_IMPORT_ROWS) {
+        jsonResponse(['error' => 'تعداد ردیف‌های فایل پشتیبان بیش از حد مجاز است'], 400);
+    }
 
     $stmtUser = $db->prepare("SELECT 1 FROM users WHERE id = :id");
     $stmtUser->execute([':id' => $targetId]);

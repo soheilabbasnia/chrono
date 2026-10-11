@@ -9,6 +9,56 @@ document.addEventListener('DOMContentLoaded', () => {
     let reportFilters = { text: '', from: null, to: null };
     let allUsersList = [];
     let allPermissionsList = [];
+    let csrfToken = '';
+    let forcedModalActive = false;
+
+    const apiPost = (action, body = {}) => fetch(`api.php?action=${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+        body: JSON.stringify(body)
+    });
+
+    const validatePasswordClient = (pw) => {
+        if (pw.length > 72) return 'رمز عبور نباید بیش از ۷۲ کاراکتر باشد';
+        if (pw.length < 10) return 'رمز عبور باید حداقل ۱۰ کاراکتر باشد';
+        if (!/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw)) return 'رمز عبور باید شامل حداقل یک حرف و یک عدد باشد';
+        return '';
+    };
+
+    const TOAST_ICONS = {
+        success: '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>',
+        error: '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>',
+        info: '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>'
+    };
+
+    const showToast = (message, type = 'info') => {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 w-full max-w-sm px-3 pointer-events-none';
+            document.body.appendChild(container);
+        }
+        const accent = type === 'success' ? 'text-emerald-glow border-emerald-glow/40'
+            : type === 'error' ? 'text-red-400 border-red-500/40'
+            : 'text-soft-color border-border-main';
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto w-full bg-panel border ${accent} rounded-xl shadow-glow-strong px-4 py-3 flex items-center gap-3 text-xs sm:text-sm`;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        toast.style.transition = 'opacity .2s ease, transform .2s ease';
+        toast.innerHTML = `<span class="shrink-0">${TOAST_ICONS[type] || TOAST_ICONS.info}</span><span class="flex-1 text-main-color leading-relaxed break-words">${escapeHtml(message)}</span>`;
+        container.appendChild(toast);
+        requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; });
+        const remove = () => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-10px)';
+            setTimeout(() => toast.remove(), 200);
+        };
+        const timer = setTimeout(remove, 3800);
+        toast.addEventListener('click', () => { clearTimeout(timer); remove(); });
+    };
 
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
@@ -87,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modalStack.length > 0) closeModal();
+        if (e.key === 'Escape' && modalStack.length > 0 && !forcedModalActive) closeModal();
     });
 
     const tabTracker = document.getElementById('tab-tracker');
@@ -255,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     closeModal();
                     renderTracker();
                 } catch (err) {
-                    alert("فرمت تاریخ نامعتبر است");
+                    showToast("فرمت تاریخ نامعتبر است", 'error');
                 }
             };
         });
@@ -335,11 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     toggleBtn.addEventListener('click', async () => {
         if (state.activeSession) {
-            const res = await fetch('api.php?action=stop_session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ endTime: Date.now() })
-            });
+            const res = await apiPost('stop_session', { endTime: Date.now() });
             if (res.ok) fetchUserData();
         } else {
             openTaskModal();
@@ -366,11 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const confirmTask = async () => {
                 const now = Date.now();
-                const res = await fetch('api.php?action=start_session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: now, startTime: now, task: toFa(taskInput.value.trim()) })
-                });
+                const res = await apiPost('start_session', { id: now, startTime: now, task: toFa(taskInput.value.trim()) });
                 if (res.ok) {
                     closeModal();
                     fetchUserData();
@@ -453,22 +495,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (newEnd <= newStart) throw new Error("زمان پایان باید بعد از شروع باشد");
 
-                    const res = await fetch('api.php?action=update_session', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id: session.id,
-                            startTime: newStart,
-                            endTime: newEnd,
-                            task: toFa(modal.querySelector('#edit-task').value.trim())
-                        })
+                    const res = await apiPost('update_session', {
+                        id: session.id,
+                        startTime: newStart,
+                        endTime: newEnd,
+                        task: toFa(modal.querySelector('#edit-task').value.trim())
                     });
                     if (res.ok) {
                         closeModal();
                         if (callback) callback();
                     }
                 } catch (err) {
-                    alert("خطا: " + err.message);
+                    showToast("خطا: " + err.message, 'error');
                 }
             };
         });
@@ -491,11 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(html, (modal) => {
             modal.querySelector('.modal-cancel').onclick = closeModal;
             modal.querySelector('#modal-delete').onclick = async () => {
-                const res = await fetch('api.php?action=delete_session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
+                const res = await apiPost('delete_session', { id });
                 if (res.ok) {
                     closeModal();
                     if (callback) callback();
@@ -535,22 +569,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const oldPass = modal.querySelector('#change-old-pass') ? modal.querySelector('#change-old-pass').value : '';
                 const newPass = modal.querySelector('#change-new-pass').value;
 
-                if (!newPass) {
-                    alert("رمز عبور جدید را وارد کنید");
+                const pwError = validatePasswordClient(newPass);
+                if (pwError) {
+                    showToast(pwError, 'error');
                     return;
                 }
 
-                const res = await fetch('api.php?action=change_password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: targetUserId, old_password: oldPass, new_password: newPass })
-                });
+                const res = await apiPost('change_password', { user_id: targetUserId, old_password: oldPass, new_password: newPass });
                 const data = await res.json();
                 if (res.ok) {
-                    alert("رمز عبور با موفقیت تغییر یافت");
+                    showToast("رمز عبور با موفقیت تغییر یافت", 'success');
                     closeModal();
                 } else {
-                    alert(data.error || "خطا در تغییر رمز عبور");
+                    showToast(data.error || "خطا در تغییر رمز عبور", 'error');
                 }
             };
         });
@@ -596,7 +627,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.removeChild(link);
             }
         } catch (e) {
-            alert("خطا در پشتیبان‌گیری");
+            showToast("خطا در پشتیبان‌گیری", 'error');
         }
     };
 
@@ -612,19 +643,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const parsed = JSON.parse(event.target.result);
                     const sessions = parsed.sessions || [];
-                    const res = await fetch('api.php?action=import_user_json', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: userId, sessions })
-                    });
+                    const res = await apiPost('import_user_json', { user_id: userId, sessions });
                     if (res.ok) {
-                        alert("بازیابی اطلاعات با موفقیت انجام شد");
+                        showToast("بازیابی اطلاعات با موفقیت انجام شد", 'success');
                         if (callback) callback();
                     } else {
-                        alert("خطا در بازیابی داده‌ها");
+                        showToast("خطا در بازیابی داده‌ها", 'error');
                     }
                 } catch (err) {
-                    alert("فایل نامعتبر است");
+                    showToast("فایل نامعتبر است", 'error');
                 }
             };
             reader.readAsText(file);
@@ -832,7 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     closeModal();
                     renderReports();
                 } catch (err) {
-                    alert("فرمت تاریخ نامعتبر است");
+                    showToast("فرمت تاریخ نامعتبر است", 'error');
                 }
             };
         });
@@ -916,7 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`api.php?action=get_user_report&target_id=${targetUserId}`);
             if (!res.ok) {
-                alert("خطا در بارگذاری گزارش");
+                showToast("خطا در بارگذاری گزارش", 'error');
                 return;
             }
             const data = await res.json();
@@ -1071,21 +1098,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const role = modal.querySelector('#new-user-role').value;
 
                 if (!fullName || !username || !password) {
-                    alert("تمام فیلدها الزامی هستند");
+                    showToast("تمام فیلدها الزامی هستند", 'error');
                     return;
                 }
 
-                const res = await fetch('api.php?action=admin_create_user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ full_name: fullName, username, password, role })
-                });
+                const pwError = validatePasswordClient(password);
+                if (pwError) {
+                    showToast(pwError, 'error');
+                    return;
+                }
+
+                const res = await apiPost('admin_create_user', { full_name: fullName, username, password, role });
                 const data = await res.json();
                 if (res.ok) {
                     closeModal();
                     loadVisibleUsers();
                 } else {
-                    alert(data.error || "خطا در ثبت کاربر");
+                    showToast(data.error || "خطا در ثبت کاربر", 'error');
                 }
             };
         });
@@ -1109,11 +1138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(html, (modal) => {
             modal.querySelector('.modal-cancel').onclick = closeModal;
             modal.querySelector('#modal-confirm-del-user').onclick = async () => {
-                const res = await fetch('api.php?action=admin_delete_user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId })
-                });
+                const res = await apiPost('admin_delete_user', { user_id: userId });
                 if (res.ok) {
                     closeModal();
                     loadVisibleUsers();
@@ -1174,16 +1199,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const checkedIds = Array.from(modal.querySelectorAll('.perm-checkbox:checked')).map(cb => Number(toEn(cb.value))).filter(id => Number.isInteger(id) && id > 0);
 
                 try {
-                    const res = await fetch('api.php?action=admin_save_permissions', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            viewer_id: Number(viewerId),
-                            targets: checkedIds
-                        })
+                    const res = await apiPost('admin_save_permissions', {
+                        viewer_id: Number(viewerId),
+                        targets: checkedIds
                     });
 
                     const data = await res.json();
@@ -1192,12 +1210,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         closeModal();
                         await loadVisibleUsers();
                     } else {
-                        alert(data.error || 'خطا در ذخیره دسترسی‌ها');
+                        showToast(data.error || 'خطا در ذخیره دسترسی‌ها', 'error');
                         saveBtn.disabled = false;
                         saveBtn.textContent = 'ذخیره دسترسی‌ها';
                     }
                 } catch (err) {
-                    alert('خطا در برقراری ارتباط با سرور');
+                    showToast('خطا در برقراری ارتباط با سرور', 'error');
                     saveBtn.disabled = false;
                     saveBtn.textContent = 'ذخیره دسترسی‌ها';
                 }
@@ -1211,7 +1229,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 const data = await res.json();
                 currentUser = data.user;
+                csrfToken = data.csrf_token || csrfToken;
                 isManager = (currentUser.role === 'manager');
+                if (currentUser.must_change_password) {
+                    showLogin();
+                    openForcedPasswordModal();
+                    return;
+                }
                 showApp(data.can_view_users);
             } else {
                 showLogin();
@@ -1219,6 +1243,50 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             showLogin();
         }
+    };
+
+    const openForcedPasswordModal = () => {
+        forcedModalActive = true;
+        const html = `
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-emerald-glow/10 border border-emerald-glow/30 flex items-center justify-center shadow-glow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-glow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </div>
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold text-main-color">تغییر اجباری رمز عبور</h2>
+                    <p class="text-xs text-soft-color mt-1">برای ادامه، لطفاً یک رمز عبور جدید و امن انتخاب کنید.</p>
+                </div>
+            </div>
+            <div class="space-y-4 mb-6 text-xs sm:text-sm">
+                <div>
+                    <label class="block text-xs text-soft-color mb-2">رمز عبور فعلی (موقت)</label>
+                    <input type="password" id="forced-old-pass" dir="ltr" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color text-left focus:outline-none focus:border-emerald-glow">
+                </div>
+                <div>
+                    <label class="block text-xs text-soft-color mb-2">رمز عبور جدید (حداقل ۱۰ کاراکتر، شامل حرف و عدد)</label>
+                    <input type="password" id="forced-new-pass" dir="ltr" class="w-full bg-bg-soft border border-border-main rounded-xl p-3 text-main-color text-left focus:outline-none focus:border-emerald-glow">
+                </div>
+            </div>
+            <button id="forced-save-pass" class="w-full h-11 rounded-xl bg-emerald-glow text-bg-main font-bold text-sm shadow-glow hover:opacity-90 active:scale-95 transition-all">ذخیره و ادامه</button>
+        `;
+        openModal(html, (modal) => {
+            modal.querySelector('#forced-save-pass').onclick = async () => {
+                const oldPass = modal.querySelector('#forced-old-pass').value;
+                const newPass = modal.querySelector('#forced-new-pass').value;
+                const pwError = validatePasswordClient(newPass);
+                if (pwError) { showToast(pwError, 'error'); return; }
+
+                const res = await apiPost('change_password', { user_id: currentUser.id, old_password: oldPass, new_password: newPass });
+                const data = await res.json();
+                if (res.ok) {
+                    forcedModalActive = false;
+                    showToast("رمز عبور با موفقیت تغییر یافت", 'success');
+                    setTimeout(() => window.location.reload(), 900);
+                } else {
+                    showToast(data.error || "خطا در تغییر رمز عبور", 'error');
+                }
+            };
+        });
     };
 
     const showLogin = () => {
@@ -1262,6 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (res.ok) {
                 currentUser = data.user;
+                csrfToken = data.csrf_token || '';
                 isManager = (currentUser.role === 'manager');
                 loginForm.reset();
                 checkAuth();
@@ -1276,8 +1345,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const logoutUser = async () => {
-        await fetch('api.php?action=logout');
+        await apiPost('logout', {});
         currentUser = null;
+        csrfToken = '';
         state.sessions = [];
         state.activeSession = null;
         showLogin();

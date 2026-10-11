@@ -40,7 +40,8 @@ function handleStartSession(PDO $db, int $userId, array $input): void {
 
 function handleStopSession(PDO $db, int $userId, array $input): void {
     $endTime = (int)($input['endTime'] ?? (microtime(true) * 1000));
-    $stmt = $db->prepare("UPDATE sessions SET endTime = GREATEST(:endTime, startTime), is_active = 0 WHERE user_id = :uid AND is_active = 1");
+    $greatest = sqlGreatest(':endTime', 'startTime');
+    $stmt = $db->prepare("UPDATE sessions SET endTime = $greatest, is_active = 0 WHERE user_id = :uid AND is_active = 1");
     $stmt->bindValue(':endTime', $endTime, PDO::PARAM_INT);
     $stmt->bindValue(':uid', $userId, PDO::PARAM_INT);
     $stmt->execute();

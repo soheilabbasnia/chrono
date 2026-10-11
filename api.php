@@ -1,8 +1,22 @@
 <?php
 declare(strict_types=1);
 
+(function (): void {
+    foreach ([__DIR__ . '/config.php', __DIR__ . '/config.local.php'] as $candidate) {
+        if (is_file($candidate)) {
+            require_once $candidate;
+            return;
+        }
+    }
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo '{"error":"فایل پیکربندی یافت نشد (config.php)"}';
+    exit;
+})();
+
+$trustProxy = defined('TRUST_PROXY') && TRUST_PROXY === true;
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    || ($trustProxy && (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'));
 
 ini_set('session.cookie_httponly', '1');
 ini_set('session.use_only_cookies', '1');
@@ -48,6 +62,7 @@ set_exception_handler(function (Throwable $e): void {
 
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/logger.php';
+require_once __DIR__ . '/includes/security.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/sessions.php';
 require_once __DIR__ . '/includes/users.php';
@@ -64,6 +79,9 @@ if ($action === 'login' && $method === 'POST') {
 }
 if ($action === 'logout') {
     if (isset($_SESSION['user_id'])) {
+        if ($method !== 'POST' || !validateCsrfToken()) {
+            jsonResponse(['error' => 'درخواست نامعتبر است'], 403);
+        }
         logUserActivity((int)$_SESSION['user_id'], 'LOGOUT', 'کاربر خارج شد');
     }
     handleLogout();
@@ -75,21 +93,50 @@ if (!isset($_SESSION['user_id'])) {
 
 $currentUserId = (int)$_SESSION['user_id'];
 
-$stmtAuth = $db->prepare("SELECT role FROM users WHERE id = :id");
+$stmtAuth = $db->prepare("SELECT role, must_change_password FROM users WHERE id = :id");
 $stmtAuth->execute([':id' => $currentUserId]);
-$dbRole = $stmtAuth->fetchColumn();
-if ($dbRole === false) {
+$authRow = $stmtAuth->fetch();
+if (!$authRow) {
     $_SESSION = [];
     session_destroy();
     jsonResponse(['error' => 'لطفاً ابتدا وارد سیستم شوید'], 401);
 }
-$currentUserRole = (string)$dbRole;
+$currentUserRole = (string)$authRow['role'];
+$mustChangePassword = (int)($authRow['must_change_password'] ?? 0) === 1;
+
+$now = time();
+$lastActivity = (int)($_SESSION['last_activity'] ?? $now);
+if (($now - $lastActivity) > IDLE_TIMEOUT) {
+    $_SESSION = [];
+    session_destroy();
+    jsonResponse(['error' => 'نشست شما به دلیل عدم فعالیت منقضی شد. دوباره وارد شوید'], 401);
+}
+$_SESSION['last_activity'] = $now;
+$csrfToken = ensureCsrfToken();
+
+$mutatingActions = [
+    'start_session', 'stop_session', 'update_session', 'delete_session',
+    'change_password', 'admin_create_user', 'admin_delete_user',
+    'admin_save_permissions', 'import_user_json',
+];
+if (in_array($action, $mutatingActions, true)) {
+    if ($method !== 'POST') {
+        jsonResponse(['error' => 'متد درخواست نامعتبر است'], 405);
+    }
+    if (!validateCsrfToken()) {
+        jsonResponse(['error' => 'توکن امنیتی نامعتبر است. صفحه را تازه‌سازی کنید'], 403);
+    }
+}
+
+if ($mustChangePassword && !in_array($action, ['me', 'change_password'], true)) {
+    jsonResponse(['error' => 'برای ادامه باید ابتدا رمز عبور خود را تغییر دهید', 'must_change_password' => true], 403);
+}
 
 session_write_close();
 
 switch ($action) {
     case 'me':
-        handleGetCurrentUser($db, $currentUserId, $currentUserRole);
+        handleGetCurrentUser($db, $currentUserId, $currentUserRole, $csrfToken, $mustChangePassword);
         break;
 
     case 'get_sessions':

@@ -1,17 +1,41 @@
-# فایل محرمانه دیتابیس
+# فایل محرمانه دیتابیس و پیکربندی محلی
+config.php
 config.local.php
 
-# پوشه و فایل‌های لاگ
+# پوشه داده (SQLite) و فایل دیتابیس — فقط فایل‌های دیتابیس نادیده گرفته می‌شوند، نه .htaccess
+data/*.sqlite
+data/*.sqlite3
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# پوشه و فایل‌های لاگ و رمز اولیه مدیر
 logs/*.log
 logs/*.log.*
 logs/*.log.1
+logs/*.txt
+logs/.login_throttle.json
 
 # پشتیبان‌ها و خروجی‌های دیتابیس
 *.sql
-*.sqlite
+
+# ابزار و تنظیمات محلی Claude
+.claude/
+
+# وابستگی‌ها (در صورت افزوده‌شدن در آینده)
+/vendor/
+/node_modules/
+
+# فایل‌های محیط
+.env
+.env.*
 
 # فایل‌های سیستم‌عامل و IDE
 .DS_Store
 Thumbs.db
+*.swp
+*~
 .vscode/
 .idea/
