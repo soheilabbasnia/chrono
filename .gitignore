@@ -21,6 +21,10 @@ logs/.login_throttle.json
 # پشتیبان‌ها و خروجی‌های دیتابیس
 *.sql
 
+# بستهٔ خروجی دیپلوی (با scripts/make-deploy.sh ساخته می‌شود)
+/deploy/
+/chrono-deploy.zip
+
 # ابزار و تنظیمات محلی Claude
 .claude/
 
