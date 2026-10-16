@@ -20,7 +20,7 @@ html.light {
     --c-text-muted: 100 116 139;
 }
 
-html, body {
+html, body, #app {
     height: 100%;
     overflow: hidden;
 }

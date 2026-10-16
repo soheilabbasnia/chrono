@@ -12,11 +12,9 @@ data/*.sqlite3
 *.sqlite-shm
 
 # پوشه و فایل‌های لاگ و رمز اولیه مدیر
-logs/*.log
-logs/*.log.*
-logs/*.log.1
-logs/*.txt
-logs/.login_throttle.json
+logs/*
+logs/.*
+!logs/.htaccess
 
 # پشتیبان‌ها و خروجی‌های دیتابیس
 *.sql

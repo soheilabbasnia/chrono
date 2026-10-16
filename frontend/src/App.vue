@@ -1,10 +1,12 @@
 <template>
-    <LoginView v-if="auth.ready && !auth.user" />
-    <template v-else-if="auth.ready && auth.user">
-        <div v-if="auth.mustChange" class="fixed inset-0 z-40 bg-bg-main"></div>
-        <ForcedPasswordModal v-if="auth.mustChange" />
-        <AppShell v-else />
-    </template>
+    <div class="flex-1 flex flex-col min-h-0">
+        <LoginView v-if="auth.ready && !auth.user" />
+        <template v-else-if="auth.ready && auth.user">
+            <div v-if="auth.mustChange" class="fixed inset-0 z-40 bg-bg-main"></div>
+            <ForcedPasswordModal v-if="auth.mustChange" />
+            <AppShell v-else />
+        </template>
+    </div>
     <ToastHost />
 </template>
 

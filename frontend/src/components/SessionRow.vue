@@ -10,8 +10,8 @@
             </div>
             <div class="col-span-1 flex justify-end gap-1">
                 <template v-if="!active">
-                    <button class="p-1.5 rounded-lg hover:bg-border-main text-soft-color hover:text-emerald-glow" aria-label="ویرایش" @click="$emit('edit')" v-html="editIcon"></button>
                     <button class="p-1.5 rounded-lg hover:bg-border-main text-soft-color hover:text-red-500" aria-label="حذف" @click="$emit('delete')" v-html="trashIcon"></button>
+                    <button class="p-1.5 rounded-lg hover:bg-border-main text-soft-color hover:text-emerald-glow" aria-label="ویرایش" @click="$emit('edit')" v-html="editIcon"></button>
                 </template>
             </div>
         </div>
@@ -20,8 +20,8 @@
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1 text-main-color whitespace-pre-wrap break-words leading-relaxed text-sm">{{ taskStr }}</div>
                 <div v-if="!active" class="flex items-center gap-1 shrink-0">
-                    <button class="p-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow" aria-label="ویرایش" @click="$emit('edit')" v-html="editIcon"></button>
                     <button class="p-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-red-500" aria-label="حذف" @click="$emit('delete')" v-html="trashIcon"></button>
+                    <button class="p-1.5 rounded-lg bg-bg-soft border border-border-main text-soft-color hover:text-emerald-glow" aria-label="ویرایش" @click="$emit('edit')" v-html="editIcon"></button>
                 </div>
             </div>
             <div class="flex items-center flex-wrap gap-x-2 gap-y-1 text-[11px] text-muted-color">
